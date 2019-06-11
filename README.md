@@ -17,7 +17,7 @@ To achieve compatibility with Apple AirDrop, OpenDrop requires the target platfo
 
 **Apple Wireless Direct Link.**
 As AirDrop exclusively runs over Apple Wireless Direct Link (AWDL), OpenDrop is only supported on macOS or on Linux systems running
-an open re-implementation of AWDL.
+an open re-implementation of AWDL such as [OWL](https://github.com/seemoo-lab/owl).
 
 **Libraries.**
 OpenDrop relies on current versions of [OpenSSL](https://www.openssl.org) and [libarchive](https://www.libarchive.org).
@@ -76,6 +76,17 @@ Receiving is much easier. Simply use the `receive` command. OpenDrop will accept
 ```
 $ opendrop receive
 ```
+
+
+## Current Limitations/TODOs
+
+OpenDrop is the result of a research project and, thus, has several limitations (non-exhaustive list below). I do not have the capacity to work on them myself but am happy to provide assistance if somebody else want to take them on.
+
+* *Triggering macOS/iOS receivers via Bluetooth Low Energy.* Apple devices start their AWDL interface and AirDrop server only after receiving a custom advertisement via Bluetooth LE (see USENIX paper for details). This means, that Apple AirDrop receivers may not be discovered even if they are discoverable by *everyone*.
+
+* *Sender/Receiver authentication and connection state.* Currently, there is no peer authentication as in Apple's AirDrop, in particular, (1) OpenDrop does not verify that the TLS certificate is signed by [Apple's root](opendrop/certs/apple_root_ca.pem) and (2) that the Apple ID validation record is correct (see USENIX paper for details). In addition, OpenDrop automatically accepts any file that it receives due to a missing connection state.
+
+* *Sending multiple files.* Apple AirDrop supports sending multiple files at once, OpenDrop does not (would require adding more files to the archive, modify HTTP /Ask request, etc.).
 
 
 ## Related Papers
