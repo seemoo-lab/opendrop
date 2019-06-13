@@ -10,27 +10,25 @@ with open(join(this_dir, 'README.md'), encoding='utf-8') as file:
 setup(
     name='opendrop',
     version=__version__,
+    python_requires='>=3.6',
     description='An Open Source AirDrop Implementation',
     long_description=long_description,
     url='https://owlink.org',
     author='Milan Stute, Alexander Heinrich',
     classifiers=[
-        'Intended Audience :: Developers',
-        'Topic :: Utilities',
-        'License :: Public Domain',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Operating System :: MacOS',
+        'Operating System :: POSIX :: Linux',
         'Natural Language :: English',
-        'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.6.3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     keywords='cli',
     packages=find_packages(exclude=['docs']),
     package_data={
         'opendrop': ['certs/*.pem']
     },
-
     install_requires=['pycrypto', 'requests', 'fleep', 'netifaces', 'Pillow',
                       'requests_toolbelt', 'ctypescrypto', 'libarchive-c'],
     entry_points={

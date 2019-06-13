@@ -13,7 +13,8 @@ OpenDrop is not affiliated with or endorsed by Apple Inc. Use this code at your 
 
 ## Requirements
 
-To achieve compatibility with Apple AirDrop, OpenDrop requires the target platform to support a specific Wi-Fi link layer as well as several libraries.
+To achieve compatibility with Apple AirDrop, OpenDrop requires the target platform to support a specific Wi-Fi link layer.
+In addition, it requires Python >=3.6 as well as several libraries.
 
 **Apple Wireless Direct Link.**
 As AirDrop exclusively runs over Apple Wireless Direct Link (AWDL), OpenDrop is only supported on macOS or on Linux systems running
