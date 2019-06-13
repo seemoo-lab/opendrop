@@ -58,7 +58,7 @@ Sending a file is typically a two-step procedure. You first discover devices in 
 Stop the process once you have found the receiver.
 ```
 $ opendrop find
-Looking for receivers. Press enter to stop ...
+Looking for receivers. Press Ctrl+C to stop ...
 Found  index 0  ID eccb2f2dcfe7  name John’s iPhone
 Found  index 1  ID e63138ac6ba8  name Jane’s MacBook Pro
 ```

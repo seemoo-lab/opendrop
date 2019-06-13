@@ -113,11 +113,12 @@ class AirDropCli:
                 self.server.stop()
 
     def find(self):
-        logger.info("Looking for receivers. Press enter to stop ...")
+        logger.info("Looking for receivers. Press Ctrl+C to stop ...")
         self.browser = AirDropBrowser(self.config)
         self.browser.start(callback_add=self._found_receiver)
         try:
-            input()
+            while True:
+                pass
         except KeyboardInterrupt:
             pass
         finally:
