@@ -46,7 +46,7 @@ class AirDropReceiverFlags:
 
 class AirDropConfig:
 
-    def __init__(self, host_name=None, computer_name=None, computer_model='OpenDrop', server_port=8771,
+    def __init__(self, host_name=None, computer_name=None, computer_model=None, server_port=8771,
                  airdrop_dir='~/.opendrop', service_id=None,
                  email=None, phone=None, legacy=False, debug=False, interface=None):
         self.airdrop_dir = os.path.expanduser(airdrop_dir)
@@ -59,6 +59,8 @@ class AirDropConfig:
         if computer_name is None:
             computer_name = host_name
         self.computer_name = computer_name
+        if computer_model is None:
+            computer_model = 'OpenDrop'
         self.computer_model = computer_model
         self.port = server_port
 
