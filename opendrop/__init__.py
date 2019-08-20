@@ -19,6 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 
-__version__ = '0.10'
+__version__ = '0.10.1'
 
 logger = logging.getLogger(__name__)

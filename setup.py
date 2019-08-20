@@ -11,10 +11,16 @@ setup(
     name='opendrop',
     version=__version__,
     python_requires='>=3.6',
-    description='An Open Source AirDrop Implementation',
+    description='An open Apple AirDrop implementation',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://owlink.org',
-    author='Milan Stute, Alexander Heinrich',
+    project_urls={
+        'Source': 'https://github.com/seemoo-lab/opendrop',
+        'Research Paper': 'https://usenix.org/conference/usenixsecurity19/presentation/stute',
+    },
+    author='The Open Wireless Link Project',
+    author_email='mstute@seemoo.tu-darmstadt.de',
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: MacOS',
