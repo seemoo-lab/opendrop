@@ -27,7 +27,7 @@ import os
 import platform
 import plistlib
 import socket
-from Crypto.Hash import SHA, SHA256
+import hashlib
 from PIL import Image, ExifTags
 from libarchive import ffi
 from libarchive.entry import new_archive_entry, ArchiveEntry
@@ -121,8 +121,8 @@ class AirDropUtil:
         valid_date = datetime.datetime.now() - datetime.timedelta(days=3)
         valid_date_string = valid_date.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-        emails_hashed = [SHA256.new(email.encode('utf-8')).hexdigest() for email in config.email]
-        phone_numbers_hashed = [SHA256.new(phone_number.encode('utf-8')).hexdigest() for phone_number in config.phone]
+        emails_hashed = [hashlib.sha256(email.encode('utf-8')).hexdigest() for email in config.email]
+        phone_numbers_hashed = [hashlib.sha256(phone_number.encode('utf-8')).hexdigest() for phone_number in config.phone]
 
         # Get the common name of the TLS certificate
         with open(tls_cert, 'rb') as cert_file:
