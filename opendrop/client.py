@@ -38,17 +38,15 @@ logger = logging.getLogger(__name__)
 class AirDropBrowser:
 
     def __init__(self, config):
-        self.ip_interface_name = config.interface
-
-        self.ip_addr = AirDropUtil.get_ip_for_interface(self.ip_interface_name, ipv6=True)
+        self.ip_addr = AirDropUtil.get_ip_for_interface(config.interface, ipv6=True)
         if self.ip_addr is None:
-            if self.ip_interface_name is 'awdl0':
+            if config.interface is 'awdl0':
                 raise RuntimeError('Interface {} does not have an IPv6 address. '
-                                   'Make sure that `owl` is running.'.format(self.ip_interface_name))
+                                   'Make sure that `owl` is running.'.format(config.interface))
             else:
-                raise RuntimeError('Interface {} does not have an IPv6 address'.format(self.ip_interface_name))
+                raise RuntimeError('Interface {} does not have an IPv6 address'.format(config.interface))
 
-        self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=self.ip_interface_name)
+        self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=config.interface)
 
         self.callback_add = None
         self.callback_remove = None

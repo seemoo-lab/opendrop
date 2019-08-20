@@ -43,27 +43,23 @@ class AirDropServer:
     def __init__(self, config):
         self.config = config
 
-        self.ip_interface_name = self.config.interface
-
         # Use IPv6
-        self.address_family = socket.AF_INET6
         self.serveraddress = ('::', self.config.port)
         self.ServerClass = HTTPServerV6
-
         self.ServerClass.allow_reuse_address = False
 
-        self.ip_addr = AirDropUtil.get_ip_for_interface(self.ip_interface_name, ipv6=True)
+        self.ip_addr = AirDropUtil.get_ip_for_interface(self.config.interface, ipv6=True)
         if self.ip_addr is None:
-            if self.ip_interface_name is 'awdl0':
+            if self.config.interface is 'awdl0':
                 raise RuntimeError('Interface {} does not have an IPv6 address. '
-                                   'Make sure that `owl` is running.'.format(self.ip_interface_name))
+                                   'Make sure that `owl` is running.'.format(self.config.interface))
             else:
-                raise RuntimeError('Interface {} does not have an IPv6 address'.format(self.ip_interface_name))
+                raise RuntimeError('Interface {} does not have an IPv6 address'.format(self.config.interface))
 
         self.Handler = AirDropServerHandler
         self.Handler.config = self.config
 
-        self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=self.ip_interface_name,
+        self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=self.config.interface,
                                  apple_mdns=True)
 
         self.http_server = self._init_server()
@@ -93,7 +89,7 @@ class AirDropServer:
             httpd = self.ServerClass(self.serveraddress, self.Handler)
 
         # Adapt socket for awdl0
-        if self.ip_interface_name == 'awdl0' and platform.system() == 'Darwin':
+        if self.config.interface == 'awdl0' and platform.system() == 'Darwin':
             httpd.socket.setsockopt(socket.SOL_SOCKET, 0x1104, 1)
 
         httpd.socket = self.config.get_ssl_context().wrap_socket(sock=httpd.socket, server_side=True)
