@@ -48,7 +48,7 @@ class AirDropConfig:
 
     def __init__(self, host_name=None, computer_name=None, computer_model=None, server_port=8771,
                  airdrop_dir='~/.opendrop', service_id=None,
-                 email=None, phone=None, legacy=False, debug=False, interface=None):
+                 email=None, phone=None, debug=False, interface=None):
         self.airdrop_dir = os.path.expanduser(airdrop_dir)
 
         self.discovery_report = os.path.join(self.airdrop_dir, 'discover.last.json')
@@ -71,10 +71,8 @@ class AirDropConfig:
         self.debug = debug
         self.debug_dir = os.path.join(self.airdrop_dir, 'debug')
 
-        self.legacy = legacy
-
         if interface is None:
-            interface = 'awdl0' if not self.legacy else 'en0'
+            interface = 'awdl0'
         self.interface = interface
 
         if email is None:

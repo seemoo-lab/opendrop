@@ -154,23 +154,6 @@ class AirDropUtil:
         return signed_data
 
     @staticmethod
-    def doubleSHA1Hash(toHash):
-        """
-        This method gets an array of strings as input and creates a double SHA-1 Hash formatted in BASE64 from it. 
-        It will return a comma seperated list of SHA-1 hashes in BASE64
-
-        :param toHash: An iterable which contains one or many str 
-        """
-
-        single_hashed = [SHA.new(to_hash.encode('utf-8')).digest() for to_hash in toHash]
-        double_hashed = [SHA.new(single).digest() for single in single_hashed]
-
-        double_hashed_base64 = [base64.b64encode(h).decode('utf-8') for h in double_hashed]
-        hash_string = ','.join(double_hashed_base64)
-
-        return hash_string
-
-    @staticmethod
     def pem2der(s):
         """
         Create DER Formatted bytes from a PEM Base64 String 

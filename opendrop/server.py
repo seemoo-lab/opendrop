@@ -43,33 +43,22 @@ class AirDropServer:
     def __init__(self, config):
         self.config = config
 
-        if self.config.legacy:
-            self.useIPv6 = False
-        else:
-            self.useIPv6 = True
         self.ip_interface_name = self.config.interface
 
-        if self.useIPv6:
-            self.address_family = socket.AF_INET6
-            self.serveraddress = ('::', self.config.port)
-            self.ServerClass = HTTPServerV6
-        else:
-            self.address_family = socket.AF_INET
-            self.serveraddress = ('0.0.0.0', self.config.port)
-            self.ServerClass = HTTPServer
+        # Use IPv6
+        self.address_family = socket.AF_INET6
+        self.serveraddress = ('::', self.config.port)
+        self.ServerClass = HTTPServerV6
 
         self.ServerClass.allow_reuse_address = False
 
-        self.ip_addr, self.byte_address = AirDropUtil.get_ip_for_interface(self.ip_interface_name, ipv6=self.useIPv6)
+        self.ip_addr, self.byte_address = AirDropUtil.get_ip_for_interface(self.ip_interface_name, ipv6=True)
 
         self.Handler = AirDropServerHandler
         self.Handler.config = self.config
 
-        if self.config.legacy:
-            self.zeroconf = Zeroconf()
-        else:
-            self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=self.ip_interface_name,
-                                     apple_mdns=True)
+        self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=self.ip_interface_name,
+                                 apple_mdns=True)
 
         self.http_server = self._init_server()
         self.service_info = self._init_service()
@@ -115,11 +104,6 @@ class AirDropServer:
 
     def get_properties(self):
         properties = {b'flags': str(self.config.flags).encode('utf-8')}
-        if self.config.legacy:
-            properties[b'phash'] = AirDropUtil.doubleSHA1Hash(self.config.phone).encode('utf-8')
-            properties[b'nhash'] = False
-            properties[b'ehash'] = AirDropUtil.doubleSHA1Hash(self.config.email).encode('utf-8')
-            properties[b'cname'] = self.config.computer_name.encode('utf-8')
         return properties
 
 

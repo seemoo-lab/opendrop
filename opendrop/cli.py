@@ -49,7 +49,6 @@ class AirDropCli:
         parser.add_argument('-p', '--phone', nargs='*', help='User\'s phone numbers (currently unused)')
         parser.add_argument('-n', '--name', help='Computer name (displayed in sharing pane)')
         parser.add_argument('-m', '--model', help='Computer model (displayed in sharing pane)')
-        parser.add_argument('-l', '--legacy', help='Enable legacy mode', action='store_true')
         parser.add_argument('-d', '--debug', help='Enable debug mode', action='store_true')
         parser.add_argument('-i', '--interface', help='Which AWDL interface to use', default='awdl0')
         args = parser.parse_args(args)
@@ -61,7 +60,7 @@ class AirDropCli:
 
         # TODO put emails and phone in canonical form (lower case, no '+' sign, etc.)
 
-        self.config = AirDropConfig(email=args.email, phone=args.phone, legacy=args.legacy,
+        self.config = AirDropConfig(email=args.email, phone=args.phone,
                                     computer_name=args.name, computer_model=args.model,
                                     debug=args.debug, interface=args.interface)
         self.server = None

@@ -38,22 +38,14 @@ logger = logging.getLogger(__name__)
 class AirDropBrowser:
 
     def __init__(self, config):
-        self.legacy_mode = config.legacy
-        if self.legacy_mode:
-            self.useIPv6 = False
-        else:
-            self.useIPv6 = True
         self.ip_interface_name = config.interface
 
-        self.ip_addr, self.byte_address = AirDropUtil.get_ip_for_interface(self.ip_interface_name, ipv6=self.useIPv6)
+        self.ip_addr, self.byte_address = AirDropUtil.get_ip_for_interface(self.ip_interface_name, ipv6=True)
 
         if self.ip_addr is None:
             raise RuntimeError('Interface {} does not have IP(v6) address'.format(self.ip_interface_name))
 
-        if self.legacy_mode:
-            self.zeroconf = Zeroconf()
-        else:
-            self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=self.ip_interface_name)
+        self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=self.ip_interface_name)
 
         self.callback_add = None
         self.callback_remove = None
@@ -143,9 +135,6 @@ class AirDropClient:
             'SenderID': self.config.service_id,
             'ConvertMediaFormats': False,
         }
-        if self.config.legacy:
-            ask_body['SenderEmailHash'] = AirDropUtil.doubleSHA1Hash(self.config.email)
-            ask_body['SenderPhoneHash'] = AirDropUtil.doubleSHA1Hash(self.config.phone)
         if self.config.record_data:
             ask_body['SenderRecordData'] = self.config.record_data
 
