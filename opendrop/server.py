@@ -52,7 +52,13 @@ class AirDropServer:
 
         self.ServerClass.allow_reuse_address = False
 
-        self.ip_addr, self.byte_address = AirDropUtil.get_ip_for_interface(self.ip_interface_name, ipv6=True)
+        self.ip_addr = AirDropUtil.get_ip_for_interface(self.ip_interface_name, ipv6=True)
+        if self.ip_addr is None:
+            if self.ip_interface_name is 'awdl0':
+                raise RuntimeError('Interface {} does not have an IPv6 address. '
+                                   'Make sure that `owl` is running.'.format(self.ip_interface_name))
+            else:
+                raise RuntimeError('Interface {} does not have an IPv6 address'.format(self.ip_interface_name))
 
         self.Handler = AirDropServerHandler
         self.Handler.config = self.config
@@ -69,7 +75,7 @@ class AirDropServer:
         service_name = self.config.service_id + '._airdrop._tcp.local.'
         info = ServiceInfo(
             '_airdrop._tcp.local.', service_name,
-            self.byte_address, self.config.port, 0, 0, properties, server)
+            self.ip_addr.packed, self.config.port, 0, 0, properties, server)
         return info
 
     def start_service(self):
