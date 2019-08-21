@@ -125,6 +125,7 @@ class AirDropCli:
             try:
                 receiver_name = client.send_discover()
             except TimeoutError:
+                receiver_name = None
                 pass
         else:
             receiver_name = None
