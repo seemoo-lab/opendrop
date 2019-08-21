@@ -38,10 +38,15 @@ Linux distributions should ship with more up-to-date versions, so this won't be 
 
 ## Installation 
 
-Installation of the python package is straight forward.
-After cloning this repository to `<PATH>`, install via `pip3`:
+Installation of the Python package [release](https://pypi.org/project/opendrop/) is straight forward using `pip3`:
 ```
-pip3 install <PATH>
+pip3 install opendrop
+```
+
+You can also install the current development version by first cloning this repository, and then installing it via `pip3`:
+```
+git clone https://github.com/seemoo-lab/opendrop.git
+pip3 install ./opendrop
 ```
 
 
@@ -105,4 +110,4 @@ OpenDrop is the result of a research project and, thus, has several limitations 
 
 OpenDrop is licensed under the **GNU General Public License v3.0**.
 We use a modified version of the [`python-zeroconf`](https://pypi.org/project/zeroconf/) package (essentially adding rudimentary IPv6 and AWDL support) which is licensed under the **GNU Lesser General Public License v2.1**.
-Both licenses are found in the `COPYING` file.
+Both licenses are found in the `LICENSE` file.
