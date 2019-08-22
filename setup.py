@@ -35,7 +35,7 @@ setup(
     package_data={
         'opendrop': ['certs/*.pem']
     },
-    install_requires=['requests', 'fleep', 'ifaddr', 'Pillow',
+    install_requires=['requests', 'fleep', 'ifaddr', 'netifaces', 'Pillow',
                       'requests_toolbelt', 'ctypescrypto', 'libarchive-c'],
     entry_points={
         'console_scripts': [
