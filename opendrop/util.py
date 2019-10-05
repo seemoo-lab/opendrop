@@ -180,7 +180,7 @@ class AirDropUtil:
             orientation = exif['Orientation']
             if orientation in angles.keys():
                 im = im.rotate(angles[orientation], expand=True)
-        except AttributeError:
+        except (AttributeError, KeyError):
             pass  # no EXIF data available
 
         # Big image
