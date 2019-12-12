@@ -18,7 +18,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import logging
+import platform
+import os
 
 __version__ = '0.10.2'
+
+if platform.system() == 'Darwin':
+	dyld_path = os.environ.get('DYLD_LIBRARY_PATH', '')  # save old path
+	openssl_path = '/usr/local/opt/openssl/lib'
+	archive_path = '/usr/local/opt/libarchive/lib'
+	os.environ['DYLD_LIBRARY_PATH'] = '{}:{}:{}'.format(dyld_path, openssl_path, archive_path)
 
 logger = logging.getLogger(__name__)

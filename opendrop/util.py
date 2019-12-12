@@ -22,7 +22,6 @@ import datetime
 import io
 import ipaddress
 import os
-import platform
 import plistlib
 import hashlib
 import ifaddr
@@ -40,18 +39,6 @@ from libarchive.ffi import (
     write_finish_entry,
 )
 from libarchive.write import ArchiveWrite, new_archive_read_disk
-if platform.system() == 'Darwin' and os.getenv('LIBCRYPTO') is not None:
-    import ctypescrypto
-    from ctypes import CDLL, c_uint64, c_void_p
-    ctypescrypto.__libname__ = os.environ['LIBCRYPTO']
-    ctypescrypto.libcrypto = CDLL(ctypescrypto.__libname__)
-    if hasattr(ctypescrypto.libcrypto,'OPENSSL_init_crypto'):
-        ctypescrypto.libcrypto.OPENSSL_init_crypto.argtypes = (c_uint64,c_void_p)
-        ctypescrypto.libcrypto.OPENSSL_init_crypto(2+4+8+0x40,None)
-        strings_loaded = True
-    else:
-        ctypescrypto.libcrypto.OPENSSL_add_all_algorithms_conf()
-        strings_loaded = False
 from ctypescrypto import cms, x509, pkey, oid
 
 
