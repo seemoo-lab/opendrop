@@ -1,4 +1,5 @@
 include README.md
+include LICENSE
 exclude .gitignore
 prune .cache
 prune .git
