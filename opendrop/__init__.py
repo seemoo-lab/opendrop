@@ -21,7 +21,7 @@ import logging
 import platform
 import os
 
-__version__ = '0.10.2'
+__version__ = '0.10.3'
 
 if platform.system() == 'Darwin':
 	dyld_path = os.environ.get('DYLD_LIBRARY_PATH', '')  # save old path
