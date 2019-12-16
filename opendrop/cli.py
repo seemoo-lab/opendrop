@@ -111,22 +111,27 @@ class AirDropCli:
 
     def _send_discover(self, info):
         try:
-            address = ipaddress.ip_address(info.address).compressed
-        except ValueError:
-            return  # not a valid address
+            address = info.parsed_addresses()[0]  # there should only be one address
+        except IndexError:
+            logger.warn('Ignoring receiver with missing address {}'.format(info))
+            return
         id = info.name.split('.')[0]
         hostname = info.server
         port = int(info.port)
         logger.debug('AirDrop service found: {}, {}:{}, ID {}'.format(hostname, address, port, id))
         client = AirDropClient(self.config, (address, int(port)))
-        flags = int(info.properties[b'flags'])
+        try:
+            flags = int(info.properties[b'flags'])
+        except KeyError:
+            # TODO in some cases, `flags` are not set in service info; for now we'll try anyway
+            flags = AirDropReceiverFlags.SUPPORTS_DISCOVER_MAYBE
+            pass
 
         if flags & AirDropReceiverFlags.SUPPORTS_DISCOVER_MAYBE:
             try:
                 receiver_name = client.send_discover()
             except TimeoutError:
                 receiver_name = None
-                pass
         else:
             receiver_name = None
         discoverable = receiver_name is not None
@@ -144,6 +149,8 @@ class AirDropCli:
         self.discover.append(node_info)
         if discoverable:
             logger.info('Found  index {}  ID {}  name {}'.format(index, id, receiver_name))
+        else:
+            logger.debug('Receiver ID {} is not discoverable'.format(id))
         self.lock.release()
 
     def receive(self):

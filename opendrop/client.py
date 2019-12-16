@@ -18,7 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import fleep
-import http
+from http.client import HTTPSConnection
 import ipaddress
 import logging
 import os
@@ -27,10 +27,9 @@ import libarchive
 import platform
 import plistlib
 import socket
-from http import client
 
 from .util import AirDropUtil, AbsArchiveWrite
-from .zeroconf import ServiceBrowser, Zeroconf
+from .zeroconf import ServiceBrowser, Zeroconf, IPVersion
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ class AirDropBrowser:
             else:
                 raise RuntimeError('Interface {} does not have an IPv6 address'.format(config.interface))
 
-        self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=config.interface)
+        self.zeroconf = Zeroconf(interfaces=[str(self.ip_addr)], ip_version=IPVersion.V6Only, apple_p2p=True)
 
         self.callback_add = None
         self.callback_remove = None
@@ -209,7 +208,7 @@ class AirDropClient:
         return headers
 
 
-class HTTPSConnectionAWDL(http.client.HTTPSConnection):
+class HTTPSConnectionAWDL(HTTPSConnection):
     """
     This class allows to bind the HTTPConnection to a specific network interface
     """

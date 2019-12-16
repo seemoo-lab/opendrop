@@ -27,7 +27,7 @@ import json
 import libarchive
 import libarchive.extract
 import libarchive.read
-from .zeroconf import Zeroconf, ServiceInfo
+from .zeroconf import Zeroconf, ServiceInfo, IPVersion
 import time
 
 from .util import AirDropUtil
@@ -59,8 +59,7 @@ class AirDropServer:
         self.Handler = AirDropServerHandler
         self.Handler.config = self.config
 
-        self.zeroconf = Zeroconf(interfaces=[self.ip_addr], ipv6_interface_name=self.config.interface,
-                                 apple_mdns=True)
+        self.zeroconf = Zeroconf(interfaces=[str(self.ip_addr)], ip_version=IPVersion.V6Only, apple_p2p=True)
 
         self.http_server = self._init_server()
         self.service_info = self._init_service()
