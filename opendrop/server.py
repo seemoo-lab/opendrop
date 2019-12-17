@@ -30,7 +30,7 @@ import libarchive.extract
 import libarchive.read
 
 from .util import AirDropUtil
-from .zeroconf import Zeroconf, ServiceInfo, IPVersion
+from zeroconf import Zeroconf, ServiceInfo, IPVersion
 
 logger = logging.getLogger(__name__)
 
