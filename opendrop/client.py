@@ -45,7 +45,9 @@ class AirDropBrowser:
             else:
                 raise RuntimeError('Interface {} does not have an IPv6 address'.format(config.interface))
 
-        self.zeroconf = Zeroconf(interfaces=[str(self.ip_addr)], ip_version=IPVersion.V6Only, apple_p2p=True)
+        self.zeroconf = Zeroconf(interfaces=[str(self.ip_addr)],
+                                 ip_version=IPVersion.V6Only,
+                                 apple_p2p=platform.system() == 'Darwin')
 
         self.callback_add = None
         self.callback_remove = None

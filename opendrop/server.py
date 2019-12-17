@@ -58,7 +58,9 @@ class AirDropServer:
         self.Handler = AirDropServerHandler
         self.Handler.config = self.config
 
-        self.zeroconf = Zeroconf(interfaces=[str(self.ip_addr)], ip_version=IPVersion.V6Only, apple_p2p=True)
+        self.zeroconf = Zeroconf(interfaces=[str(self.ip_addr)],
+                                 ip_version=IPVersion.V6Only,
+                                 apple_p2p=platform.system() == 'Darwin')
 
         self.http_server = self._init_server()
         self.service_info = self._init_service()
