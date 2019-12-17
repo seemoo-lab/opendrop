@@ -102,6 +102,4 @@ OpenDrop is the result of a research project and, thus, has several limitations 
 
 ## License
 
-OpenDrop is licensed under the **GNU General Public License v3.0**.
-We use a modified version of the [`python-zeroconf`](https://pypi.org/project/zeroconf/) package (essentially adding rudimentary IPv6 and AWDL support) which is licensed under the **GNU Lesser General Public License v2.1**.
-Both licenses are found in the `LICENSE` file.
+OpenDrop is licensed under the [**GNU General Public License v3.0**](LICENSE).

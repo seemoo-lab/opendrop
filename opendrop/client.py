@@ -30,7 +30,7 @@ import fleep
 import libarchive
 
 from .util import AirDropUtil, AbsArchiveWrite
-from .zeroconf import ServiceBrowser, Zeroconf, IPVersion
+from zeroconf import ServiceBrowser, Zeroconf, IPVersion
 
 logger = logging.getLogger(__name__)
 
