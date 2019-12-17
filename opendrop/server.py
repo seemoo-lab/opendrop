@@ -67,8 +67,12 @@ class AirDropServer:
         properties = self.get_properties()
         server = self.config.host_name + '.local.'
         service_name = self.config.service_id + '._airdrop._tcp.local.'
-        info = ServiceInfo('_airdrop._tcp.local.', service_name, self.ip_addr.packed, self.config.port, 0, 0, properties,
-                           server)
+        info = ServiceInfo('_airdrop._tcp.local.',
+                           service_name,
+                           port=self.config.port,
+                           properties=properties,
+                           server=server,
+                           addresses=[self.ip_addr.packed])
         return info
 
     def start_service(self):
