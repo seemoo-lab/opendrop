@@ -1,10 +1,10 @@
+name: Create GitHub release
+
 on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-
-name: Create Release
 
 jobs:
   build:

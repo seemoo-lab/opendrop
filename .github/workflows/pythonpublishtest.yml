@@ -1,4 +1,4 @@
-name: Upload Python Test Package
+name: Publish at test.pypi.org
 
 on:
   release:
