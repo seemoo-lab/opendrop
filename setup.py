@@ -32,11 +32,8 @@ setup(
     ],
     keywords='cli',
     packages=find_packages(exclude=['docs']),
-    package_data={
-        'opendrop': ['certs/*.pem']
-    },
-    install_requires=['requests', 'fleep', 'ifaddr', 'Pillow',
-                      'requests_toolbelt', 'ctypescrypto', 'libarchive-c'],
+    package_data={'opendrop': ['certs/*.pem']},
+    install_requires=['requests', 'fleep', 'ifaddr', 'Pillow', 'requests_toolbelt', 'ctypescrypto', 'libarchive-c'],
     entry_points={
         'console_scripts': [
             'opendrop=opendrop.cli:main',

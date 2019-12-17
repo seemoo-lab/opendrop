@@ -17,20 +17,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import io
-
+import json
 import logging
 import platform
 import plistlib
 import socket
+import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import json
+
 import libarchive
 import libarchive.extract
 import libarchive.read
-from .zeroconf import Zeroconf, ServiceInfo, IPVersion
-import time
 
 from .util import AirDropUtil
+from .zeroconf import Zeroconf, ServiceInfo, IPVersion
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,6 @@ class AirDropServer:
     """
     Announces an HTTPS AirDrop server in the local network via mDNS.
     """
-
     def __init__(self, config):
         self.config = config
 
@@ -50,7 +49,7 @@ class AirDropServer:
 
         self.ip_addr = AirDropUtil.get_ip_for_interface(self.config.interface, ipv6=True)
         if self.ip_addr is None:
-            if self.config.interface is 'awdl0':
+            if self.config.interface == 'awdl0':
                 raise RuntimeError('Interface {} does not have an IPv6 address. '
                                    'Make sure that `owl` is running.'.format(self.config.interface))
             else:
@@ -68,14 +67,13 @@ class AirDropServer:
         properties = self.get_properties()
         server = self.config.host_name + '.local.'
         service_name = self.config.service_id + '._airdrop._tcp.local.'
-        info = ServiceInfo(
-            '_airdrop._tcp.local.', service_name,
-            self.ip_addr.packed, self.config.port, 0, 0, properties, server)
+        info = ServiceInfo('_airdrop._tcp.local.', service_name, self.ip_addr.packed, self.config.port, 0, 0, properties,
+                           server)
         return info
 
     def start_service(self):
-        logger.info('Announcing service: host {}, address {}, port {}'.format(self.config.host_name,
-                                                                              self.ip_addr, self.config.port))
+        logger.info('Announcing service: host {}, address {}, port {}'.format(self.config.host_name, self.ip_addr,
+                                                                              self.config.port))
         self.zeroconf.register_service(self.service_info)
 
     def _init_server(self):
@@ -203,8 +201,7 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
 
         AirDropUtil.write_debug(self.config, post_data, 'receive_ask_request.plist')
 
-        ask_response = {'ReceiverModelName': self.config.computer_model,
-                        'ReceiverComputerName': self.config.computer_name}
+        ask_response = {'ReceiverModelName': self.config.computer_model, 'ReceiverComputerName': self.config.computer_name}
         ask_resp_binary = plistlib.dumps(ask_response, fmt=plistlib.FMT_BINARY)
 
         AirDropUtil.write_debug(self.config, ask_resp_binary, 'receive_ask_response.plist')
@@ -245,18 +242,18 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
                 self.total = 0
 
             def _next_chunk(self):
-                if self.chunk is None or len(self.chunk) is 0:
+                if self.chunk is None or len(self.chunk) == 0:
                     length = int(self.rfile.readline().rstrip(), 16)
                     self.chunk = self.rfile.read(length)
                     self.rfile.readline()  # strip trailing \n\r
 
             def readinto(self, buf):
                 self._next_chunk()
-                l = min(len(self.chunk), len(buf))
-                buf[:l] = self.chunk[:l]
-                self.chunk = self.chunk[l:]
-                self.total += l
-                return l
+                length = min(len(self.chunk), len(buf))
+                buf[:length] = self.chunk[:length]
+                self.chunk = self.chunk[length:]
+                self.total += length
+                return length
 
         def extract_stream(stream, flags=0):
             """
