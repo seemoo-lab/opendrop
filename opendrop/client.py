@@ -17,16 +17,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import fleep
-from http.client import HTTPSConnection
+import io
 import ipaddress
 import logging
 import os
-import io
-import libarchive
 import platform
 import plistlib
 import socket
+from http.client import HTTPSConnection
+
+import fleep
+import libarchive
 
 from .util import AirDropUtil, AbsArchiveWrite
 from .zeroconf import ServiceBrowser, Zeroconf, IPVersion
@@ -35,11 +36,10 @@ logger = logging.getLogger(__name__)
 
 
 class AirDropBrowser:
-
     def __init__(self, config):
         self.ip_addr = AirDropUtil.get_ip_for_interface(config.interface, ipv6=True)
         if self.ip_addr is None:
-            if config.interface is 'awdl0':
+            if config.interface == 'awdl0':
                 raise RuntimeError('Interface {} does not have an IPv6 address. '
                                    'Make sure that `owl` is running.'.format(config.interface))
             else:
@@ -80,7 +80,6 @@ class AirDropBrowser:
 
 
 class AirDropClient:
-
     def __init__(self, config, receiver):
         self.config = config
         self.receiver_host = receiver[0]
@@ -98,7 +97,8 @@ class AirDropClient:
                 _headers[key] = val
         if self.http_conn is None:
             # Use single connection
-            self.http_conn = HTTPSConnectionAWDL(self.receiver_host, self.receiver_port,
+            self.http_conn = HTTPSConnectionAWDL(self.receiver_host,
+                                                 self.receiver_port,
                                                  interface_name=self.config.interface,
                                                  context=self.config.get_ssl_context())
         self.http_conn.request('POST', url, body=body, headers=_headers)
@@ -161,6 +161,7 @@ class AirDropClient:
                     'ConvertMediaFormats': 0
                 }
                 yield file_entry
+
         ask_body['Files'] = [e for e in file_entries(file_path)]
         ask_body['Items'] = []
 
@@ -195,7 +196,7 @@ class AirDropClient:
 
     def _get_headers(self):
         """
-        Get the headers for requests sent 
+        Get the headers for requests sent
         """
         headers = {
             'Content-Type': 'application/octet-stream',
@@ -212,9 +213,17 @@ class HTTPSConnectionAWDL(HTTPSConnection):
     """
     This class allows to bind the HTTPConnection to a specific network interface
     """
-
-    def __init__(self, host, port=None, key_file=None, cert_file=None, timeout=None, source_address=None,
-                 *, context=None, check_hostname=None, interface_name=None):
+    def __init__(self,
+                 host,
+                 port=None,
+                 key_file=None,
+                 cert_file=None,
+                 timeout=None,
+                 source_address=None,
+                 *,
+                 context=None,
+                 check_hostname=None,
+                 interface_name=None):
 
         if interface_name is not None:
             if '%' not in host:
@@ -224,8 +233,13 @@ class HTTPSConnectionAWDL(HTTPSConnection):
         if timeout is None:
             timeout = socket.getdefaulttimeout()
 
-        super(HTTPSConnectionAWDL, self).__init__(host=host, port=port, key_file=key_file, cert_file=cert_file,
-                                                  timeout=timeout, source_address=source_address, context=context,
+        super(HTTPSConnectionAWDL, self).__init__(host=host,
+                                                  port=port,
+                                                  key_file=key_file,
+                                                  cert_file=cert_file,
+                                                  timeout=timeout,
+                                                  source_address=source_address,
+                                                  context=context,
                                                   check_hostname=check_hostname)
 
         self.interface_name = interface_name

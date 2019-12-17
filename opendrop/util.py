@@ -19,13 +19,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import base64
 import datetime
+import hashlib
 import io
 import ipaddress
 import os
 import plistlib
-import hashlib
+
 import ifaddr
 from PIL import Image, ExifTags
+from ctypescrypto import cms, x509, pkey, oid
 from libarchive import ffi
 from libarchive.entry import new_archive_entry, ArchiveEntry
 from libarchive.ffi import (
@@ -39,7 +41,6 @@ from libarchive.ffi import (
     write_finish_entry,
 )
 from libarchive.write import ArchiveWrite, new_archive_read_disk
-from ctypescrypto import cms, x509, pkey, oid
 
 
 class AirDropUtil:
@@ -47,13 +48,12 @@ class AirDropUtil:
     This class contains a set of utility functions that support the opendrop implementation
     They have been moved, because the opendrop files tend to get too long
     """
-
     @staticmethod
     def get_uti_type(flp) -> str:
         """
-        Get the Apple conform UTI Type from a flp instance which has been used on the data which should be sent 
+        Get the Apple conform UTI Type from a flp instance which has been used on the data which should be sent
 
-        :param flp: fleep object 
+        :param flp: fleep object
         """
 
         # Default UTI Type
@@ -132,8 +132,7 @@ class AirDropUtil:
                 cert = x509.X509(sign_cert_file.read())
                 key = pkey.PKey(privkey=key_file.read())
                 # possibly need to add intermediate certs
-                cms_signed = cms.SignedData.create(record_data_plist, cert=cert, pkey=key, certs=None,
-                                                   flags=cms.Flags.PARTIAL)
+                cms_signed = cms.SignedData.create(record_data_plist, cert=cert, pkey=key, certs=None, flags=cms.Flags.PARTIAL)
                 signed_data = AirDropUtil.pem2der(cms_signed.pem())
 
         return signed_data
@@ -141,7 +140,7 @@ class AirDropUtil:
     @staticmethod
     def pem2der(s):
         """
-        Create DER Formatted bytes from a PEM Base64 String 
+        Create DER Formatted bytes from a PEM Base64 String
 
         :param s: PEM formatted string
         """
@@ -153,10 +152,10 @@ class AirDropUtil:
     @staticmethod
     def generate_file_icon(file_path):
         """
-        Generates a small and a big thumbnail of an image 
+        Generates a small and a big thumbnail of an image
         This will make it possible to preview the sent file
 
-        :param file_path: The path to the image 
+        :param file_path: The path to the image
         """
         im = Image.open(file_path)
 
@@ -177,10 +176,10 @@ class AirDropUtil:
         file_icon = imgByteArr.getvalue()
 
         # Small image
-        #im.thumbnail((64, 64), Image.ANTIALIAS)
-        #imgByteArr = io.BytesIO()
-        #im.save(imgByteArr, format='JPEG2000')
-        #small_file_icon = imgByteArr.getvalue()
+        # im.thumbnail((64, 64), Image.ANTIALIAS)
+        # imgByteArr = io.BytesIO()
+        # im.save(imgByteArr, format='JPEG2000')
+        # small_file_icon = imgByteArr.getvalue()
 
         return file_icon
 
@@ -193,7 +192,6 @@ class AirDropUtil:
         :param bool ipv6: Boolean indicating if the ipv6 address should be retrieved
         :return: IPv4Address or IPv6Address object or None
         """
-
         def get_interface_by_name(name):
             for interface in ifaddr.get_adapters():
                 if interface.name == name:
@@ -241,7 +239,7 @@ class AbsArchiveWrite(ArchiveWrite):
         with new_archive_entry() as entry_p:
             entry = ArchiveEntry(None, entry_p)
             with new_archive_read_disk(path) as read_p:
-                while 1:
+                while True:
                     r = read_next_header2(read_p, entry_p)
                     if r == ARCHIVE_EOF:
                         break
@@ -250,7 +248,7 @@ class AbsArchiveWrite(ArchiveWrite):
                     write_header(write_p, entry_p)
                     try:
                         with open(entry_sourcepath(entry_p), 'rb') as f:
-                            while 1:
+                            while True:
                                 data = f.read(block_size)
                                 if not data:
                                     break

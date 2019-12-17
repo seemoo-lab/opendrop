@@ -17,15 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import time
-
-import ipaddress
-import logging
 import argparse
-import sys
 import json
+import logging
 import os
+import sys
 import threading
+import time
 
 from .client import AirDropBrowser, AirDropClient
 from .config import AirDropConfig, AirDropReceiverFlags
@@ -39,7 +37,6 @@ def main():
 
 
 class AirDropCli:
-
     def __init__(self, args):
         parser = argparse.ArgumentParser()
         parser.add_argument('action', choices=['receive', 'find', 'send'])
@@ -60,9 +57,12 @@ class AirDropCli:
 
         # TODO put emails and phone in canonical form (lower case, no '+' sign, etc.)
 
-        self.config = AirDropConfig(email=args.email, phone=args.phone,
-                                    computer_name=args.name, computer_model=args.model,
-                                    debug=args.debug, interface=args.interface)
+        self.config = AirDropConfig(email=args.email,
+                                    phone=args.phone,
+                                    computer_name=args.name,
+                                    computer_model=args.model,
+                                    debug=args.debug,
+                                    interface=args.interface)
         self.server = None
         self.client = None
         self.browser = None
@@ -106,7 +106,7 @@ class AirDropCli:
                 json.dump(self.discover, f)
 
     def _found_receiver(self, info):
-        thread = threading.Thread(target=self._send_discover, args=(info,))
+        thread = threading.Thread(target=self._send_discover, args=(info, ))
         thread.start()
 
     def _send_discover(self, info):
@@ -193,7 +193,7 @@ class AirDropCli:
         except IndexError:
             pass
         # (2) try 'id'
-        if len(self.receiver) is 12:
+        if len(self.receiver) == 12:
             for info in infos:
                 if info['id'] == self.receiver:
                     return info
