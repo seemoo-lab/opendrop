@@ -1,31 +1,27 @@
-.PHONY: ci checkformat lint test run autoformat
+.PHONY: ci checkformat lint test autoformat
 
-VENV_NAME?=venv
-VENV_ACTIVATE=. $(VENV_NAME)/bin/activate
-PYTHON=$(VENV_NAME)/bin/python3
-PROJECT=opendrop
-
-.DEFAULT: lint
-
-venv: $(VENV_NAME)/bin/activate
-
-$(VENV_NAME)/bin/activate: setup.py requirements-dev.txt Makefile
-	test -d $(VENV_NAME) || virtualenv -p python3 $(VENV_NAME)
-	$(PYTHON) -m pip install --upgrade pip
-	$(PYTHON) -m pip install -r requirements-dev.txt
-	$(PYTHON) -m pip install -e .
-	touch $(VENV_NAME)/bin/activate
+VENV=venv
+PYTHON=$(VENV)/bin/python3
 
 ci: checkformat lint test
 
-checkformat: venv
-	$(PYTHON) -m yapf . -r --diff --exclude $(VENV_NAME)
+$(VENV): $(VENV)/bin/activate
 
-lint: venv	
-	$(PYTHON) -m flake8 . --count --show-source --statistics --exclude $(VENV_NAME)
+$(VENV)/bin/activate: setup.py requirements-dev.txt Makefile
+	test -d $(VENV) || virtualenv -p python3 $(VENV)
+	$(PYTHON) -m pip install --upgrade pip
+	$(PYTHON) -m pip install -r requirements-dev.txt
+	$(PYTHON) -m pip install -e .
+	touch $(VENV)/bin/activate
 
-test: venv
+checkformat: $(VENV)
+	$(PYTHON) -m yapf . -r --diff --exclude $(VENV)
+
+lint: $(VENV)	
+	$(PYTHON) -m flake8 . --count --show-source --statistics --exclude $(VENV)
+
+test: $(VENV)
 	$(PYTHON) -m pytest
 
-autoformat: venv
-	$(PYTHON) -m yapf . -r --in-place --exclude $(VENV_NAME)
+autoformat: $(VENV)
+	$(PYTHON) -m yapf . -r --in-place --exclude $(VENV)
