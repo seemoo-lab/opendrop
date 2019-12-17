@@ -125,7 +125,6 @@ class AirDropCli:
         except KeyError:
             # TODO in some cases, `flags` are not set in service info; for now we'll try anyway
             flags = AirDropReceiverFlags.SUPPORTS_DISCOVER_MAYBE
-            pass
 
         if flags & AirDropReceiverFlags.SUPPORTS_DISCOVER_MAYBE:
             try:

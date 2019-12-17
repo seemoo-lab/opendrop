@@ -273,7 +273,6 @@ class HTTPSConnectionAWDL(HTTPSConnection):
                     sock.bind(source_address)
                 sock.connect(sa)
                 # Break explicitly a reference cycle
-                err = None
                 return sock
 
             except socket.error as _:
