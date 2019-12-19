@@ -1,5 +1,8 @@
 # OpenDrop: an Open Source AirDrop Implementation
 
+[![Release](https://img.shields.io/pypi/v/opendrop?color=%23EC6500&label=release)](https://pypi.org/project/opendrop/)
+[![Language grade](https://img.shields.io/lgtm/grade/python/github/seemoo-lab/opendrop?label=code%20quality)](https://lgtm.com/projects/g/seemoo-lab/opendrop/context:python)
+
 *OpenDrop* is a command-line tool that allows sharing files between devices directly over Wi-Fi. Its unique feature is that it is protocol-compatible with Apple AirDrop which allows to share files with Apple devices running iOS and macOS. 
 Currently (and probably also for the foreseeable future), OpenDrop only supports sending to Apple devices that are discoverable by *everybody* as the default *contacts only* mode requires [Apple-signed certificates](https://www.apple.com/certificateauthority/pdf/Apple_AAI_CPS_v6.1.pdf).
 
@@ -32,7 +35,7 @@ Linux distributions should ship with more up-to-date versions, so this won't be 
 
 ## Installation 
 
-Installation of the Python package [release](https://pypi.org/project/opendrop/) is straight forward using `pip3`:
+Installation of the Python package [release](https://pypi.org/project/opendrop/) is straightforward using `pip3`:
 ```
 pip3 install opendrop
 ```
@@ -89,7 +92,7 @@ OpenDrop is the result of a research project and, thus, has several limitations 
 * *Sending multiple files.* Apple AirDrop supports sending multiple files at once, OpenDrop does not (would require adding more files to the archive, modify HTTP /Ask request, etc.).
 
 
-## Related Papers
+## Our Papers
 
 * Milan Stute, Sashank Narain, Alex Mariotto, Alexander Heinrich, David Kreitschmann, Guevara Noubir, and Matthias Hollick. **A Billion Open Interfaces for Eve and Mallory: MitM, DoS, and Tracking Attacks on iOS and macOS Through Apple Wireless Direct Link.** *28th USENIX Security Symposium (USENIX Security ’19)*, August 14–16, 2019, Santa Clara, CA, USA. [Link](https://www.usenix.org/conference/usenixsecurity19/presentation/stute)
 
