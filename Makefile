@@ -8,6 +8,9 @@ ci: checkformat lint test
 $(VENV): $(VENV)/bin/activate
 
 $(VENV)/bin/activate: setup.py requirements-dev.txt Makefile
+ifeq (, $(shell which virtualenv))
+	$(error "`virtualenv` is not installed, consider running `pip3 install virtualenv`")
+endif
 	test -d $(VENV) || virtualenv -p python3 $(VENV)
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install -r requirements-dev.txt
