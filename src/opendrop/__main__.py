@@ -17,6 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from opendrop import cli
+from src.opendrop import cli
 
 cli.main()
