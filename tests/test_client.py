@@ -1,5 +1,5 @@
-from src.opendrop.client import AirDropBrowser
-from src.opendrop.config import AirDropConfig
+from opendrop.client import AirDropBrowser
+from opendrop.config import AirDropConfig
 
 
 def get_loopback():
