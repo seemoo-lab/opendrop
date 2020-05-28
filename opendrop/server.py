@@ -298,9 +298,10 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         elif self.path == '/Upload':
             self.handle_upload()
         else:
-            answer = 'POST request for {}'.format(self.path).encode('utf-8')
-            self._set_response(len(answer))
-            self.wfile.write(answer)
+            logger.debug('POST request at {}'.format(self.path))
+            self.send_response(400)
+            self.send_header('Content-Length', 0)
+            self.end_headers()
 
     def log_message(self, format, *args):
         logger.debug('{} - - [{}] {}'.format(self.client_address[0], self.log_date_time_string(), format % args))
