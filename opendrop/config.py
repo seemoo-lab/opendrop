@@ -34,6 +34,7 @@ class AirDropReceiverFlags:
     Recovered from sharingd`receiverSupportsX methods.
     A valid node needs to either have SUPPORTS_PIPELINING or SUPPORTS_MIXED_TYPES
     according to sharingd`[SDBonjourBrowser removeInvalidNodes:].
+    Default flags on macOS: 0x3fb according to sharingd`[SDRapportBrowser defaultSFNodeFlags]
     """
     SUPPORTS_URL = 0x01
     SUPPORTS_DVZIP = 0x02
@@ -43,6 +44,8 @@ class AirDropReceiverFlags:
     SUPPORTS_UNKNOWN2 = 0x20
     SUPPORTS_IRIS = 0x40
     SUPPORTS_DISCOVER_MAYBE = 0x80  # Probably indicates that server supports /Discover URL
+    SUPPORTS_UNKNOWN3 = 0x100
+    SUPPORTS_ASSET_BUNDLE = 0x200
 
 
 class AirDropConfig:
