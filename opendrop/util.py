@@ -48,6 +48,7 @@ class AirDropUtil:
     This class contains a set of utility functions that support the opendrop implementation
     They have been moved, because the opendrop files tend to get too long
     """
+
     @staticmethod
     def get_uti_type(flp) -> str:
         """
@@ -57,36 +58,36 @@ class AirDropUtil:
         """
 
         # Default UTI Type
-        uti_type = 'public.content'
+        uti_type = "public.content"
         if len(flp.mime) == 0 or len(flp.type) == 0:
             return uti_type
 
         mime = flp.mime[0]
         f_type = flp.type[0]
-        if 'image' in mime:
-            uti_type = 'public.image'
+        if "image" in mime:
+            uti_type = "public.image"
 
-            if 'jpg' in mime:
-                uti_type = 'public.jpeg'
-            elif 'jp2' in mime:
-                uti_type = 'public.jpeg-2000'
-            elif 'gif' in mime:
-                uti_type = 'com.compuserve.gif'
-            elif 'png' in mime:
-                uti_type = 'public.png'
-            elif 'raw' in mime or 'raw' in f_type:
-                uti_type = 'public.camera-raw-image'
-        elif 'audio' in f_type:
-            uti_type = 'public.audio'
-        elif 'video' in f_type:
-            uti_type = 'public.video'
-        elif 'archive' in f_type:
-            uti_type = 'public.data'
+            if "jpg" in mime:
+                uti_type = "public.jpeg"
+            elif "jp2" in mime:
+                uti_type = "public.jpeg-2000"
+            elif "gif" in mime:
+                uti_type = "com.compuserve.gif"
+            elif "png" in mime:
+                uti_type = "public.png"
+            elif "raw" in mime or "raw" in f_type:
+                uti_type = "public.camera-raw-image"
+        elif "audio" in f_type:
+            uti_type = "public.audio"
+        elif "video" in f_type:
+            uti_type = "public.video"
+        elif "archive" in f_type:
+            uti_type = "public.data"
 
-            if 'gzip' in mime:
-                uti_type = 'org.gnu.gnu-zip-archive'
-            if 'zip' in mime:
-                uti_type = 'public.zip-archive'
+            if "gzip" in mime:
+                uti_type = "org.gnu.gnu-zip-archive"
+            if "zip" in mime:
+                uti_type = "public.zip-archive"
 
         return uti_type
 
@@ -104,35 +105,46 @@ class AirDropUtil:
         """
 
         valid_date = datetime.datetime.now() - datetime.timedelta(days=3)
-        valid_date_string = valid_date.strftime('%Y-%m-%dT%H:%M:%SZ')
+        valid_date_string = valid_date.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        emails_hashed = [hashlib.sha256(email.encode('utf-8')).hexdigest() for email in config.email]
-        phone_numbers_hashed = [hashlib.sha256(phone_number.encode('utf-8')).hexdigest() for phone_number in config.phone]
+        emails_hashed = [
+            hashlib.sha256(email.encode("utf-8")).hexdigest() for email in config.email
+        ]
+        phone_numbers_hashed = [
+            hashlib.sha256(phone_number.encode("utf-8")).hexdigest()
+            for phone_number in config.phone
+        ]
 
         # Get the common name of the TLS certificate
-        with open(tls_cert, 'rb') as cert_file:
+        with open(tls_cert, "rb") as cert_file:
             cert = x509.X509(cert_file.read())
-            cn = cert.subject[oid.Oid('2.5.4.3')]
-            encDsID = cn.replace('com.apple.idms.appleid.prd.', '')
+            cn = cert.subject[oid.Oid("2.5.4.3")]
+            encDsID = cn.replace("com.apple.idms.appleid.prd.", "")
 
         # Construct record data
         record_data = {
-            'Version': 2,
-            'encDsID': encDsID,  # Common name suffix of the certificate
-            'altDsID': encDsID,  # Same as encDsID
-            'SuggestValidDuration': 30 * 24 * 60 * 60,  # in seconds
-            'ValidAsOf': valid_date_string,  # 3 days before now
-            'ValidatedEmailHashes': emails_hashed,
-            'ValidatedPhoneHashes': phone_numbers_hashed,
+            "Version": 2,
+            "encDsID": encDsID,  # Common name suffix of the certificate
+            "altDsID": encDsID,  # Same as encDsID
+            "SuggestValidDuration": 30 * 24 * 60 * 60,  # in seconds
+            "ValidAsOf": valid_date_string,  # 3 days before now
+            "ValidatedEmailHashes": emails_hashed,
+            "ValidatedPhoneHashes": phone_numbers_hashed,
         }
         record_data_plist = plistlib.dumps(record_data, fmt=plistlib.FMT_XML)
 
-        with open(sign_cert, 'rb') as sign_cert_file:
-            with open(key, 'rb') as key_file:
+        with open(sign_cert, "rb") as sign_cert_file:
+            with open(key, "rb") as key_file:
                 cert = x509.X509(sign_cert_file.read())
                 key = pkey.PKey(privkey=key_file.read())
                 # possibly need to add intermediate certs
-                cms_signed = cms.SignedData.create(record_data_plist, cert=cert, pkey=key, certs=None, flags=cms.Flags.PARTIAL)
+                cms_signed = cms.SignedData.create(
+                    record_data_plist,
+                    cert=cert,
+                    pkey=key,
+                    certs=None,
+                    flags=cms.Flags.PARTIAL,
+                )
                 signed_data = AirDropUtil.pem2der(cms_signed.pem())
 
         return signed_data
@@ -144,9 +156,9 @@ class AirDropUtil:
 
         :param s: PEM formatted string
         """
-        start = s.find('-----\n')
-        finish = s.rfind('\n-----END')
-        data = s[start + 6:finish]
+        start = s.find("-----\n")
+        finish = s.rfind("\n-----END")
+        data = s[start + 6 : finish]
         return base64.b64decode(data)
 
     @staticmethod
@@ -161,9 +173,13 @@ class AirDropUtil:
 
         # rotate according to EXIF tags
         try:
-            exif = dict((ExifTags.TAGS[k], v) for k, v in im._getexif().items() if k in ExifTags.TAGS)
+            exif = dict(
+                (ExifTags.TAGS[k], v)
+                for k, v in im._getexif().items()
+                if k in ExifTags.TAGS
+            )
             angles = {3: 180, 6: 270, 8: 90}
-            orientation = exif['Orientation']
+            orientation = exif["Orientation"]
             if orientation in angles.keys():
                 im = im.rotate(angles[orientation], expand=True)
         except (AttributeError, KeyError):
@@ -172,7 +188,7 @@ class AirDropUtil:
         # Big image
         im.thumbnail((540, 540), Image.ANTIALIAS)
         imgByteArr = io.BytesIO()
-        im.save(imgByteArr, format='JPEG2000')
+        im.save(imgByteArr, format="JPEG2000")
         file_icon = imgByteArr.getvalue()
 
         # Small image
@@ -192,6 +208,7 @@ class AirDropUtil:
         :param bool ipv6: Boolean indicating if the ipv6 address should be retrieved
         :return: IPv4Address or IPv6Address object or None
         """
+
         def get_interface_by_name(name):
             for interface in ifaddr.get_adapters():
                 if interface.name == name:
@@ -204,7 +221,9 @@ class AirDropUtil:
 
         for ip in interface.ips:
             if ip.is_IPv6 and ipv6:
-                return ipaddress.IPv6Address(ip.ip[0])  # first of (ip, flowinfo, scope_id) tuple
+                return ipaddress.IPv6Address(
+                    ip.ip[0]
+                )  # first of (ip, flowinfo, scope_id) tuple
             if ip.is_IPv4 and not ipv6:
                 return ipaddress.IPv4Address(ip.ip)
 
@@ -217,8 +236,8 @@ class AirDropUtil:
         if not os.path.exists(config.debug_dir):
             os.makedirs(config.debug_dir)
         debug_file_path = os.path.join(config.debug_dir, file_name)
-        with open(debug_file_path, 'wb') as file:
-            if hasattr(data, 'read'):
+        with open(debug_file_path, "wb") as file:
+            if hasattr(data, "read"):
                 file.write(data.read())
                 data.seek(0)  # reset cursor position
             else:  # assume bytes-like
@@ -247,7 +266,7 @@ class AbsArchiveWrite(ArchiveWrite):
                     read_disk_descend(read_p)
                     write_header(write_p, entry_p)
                     try:
-                        with open(entry_sourcepath(entry_p), 'rb') as f:
+                        with open(entry_sourcepath(entry_p), "rb") as f:
                             while True:
                                 data = f.read(block_size)
                                 if not data:

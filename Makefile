@@ -18,7 +18,7 @@ endif
 	touch $(VENV)/bin/activate
 
 checkformat: $(VENV)
-	$(PYTHON) -m yapf . -r --diff --exclude $(VENV)
+	$(PYTHON) -m black . --check --diff --exclude $(VENV)
 
 lint: $(VENV)	
 	$(PYTHON) -m flake8 . --count --show-source --statistics --exclude $(VENV)
@@ -27,4 +27,4 @@ test: $(VENV)
 	$(PYTHON) -m pytest
 
 autoformat: $(VENV)
-	$(PYTHON) -m yapf . -r --in-place --exclude $(VENV)
+	$(PYTHON) -m black . --exclude $(VENV)

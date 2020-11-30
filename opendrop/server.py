@@ -39,47 +39,63 @@ class AirDropServer:
     """
     Announces an HTTPS AirDrop server in the local network via mDNS.
     """
+
     def __init__(self, config):
         self.config = config
 
         # Use IPv6
-        self.serveraddress = ('::', self.config.port)
+        self.serveraddress = ("::", self.config.port)
         self.ServerClass = HTTPServerV6
         self.ServerClass.allow_reuse_address = False
 
-        self.ip_addr = AirDropUtil.get_ip_for_interface(self.config.interface, ipv6=True)
+        self.ip_addr = AirDropUtil.get_ip_for_interface(
+            self.config.interface, ipv6=True
+        )
         if self.ip_addr is None:
-            if self.config.interface == 'awdl0':
-                raise RuntimeError('Interface {} does not have an IPv6 address. '
-                                   'Make sure that `owl` is running.'.format(self.config.interface))
+            if self.config.interface == "awdl0":
+                raise RuntimeError(
+                    "Interface {} does not have an IPv6 address. "
+                    "Make sure that `owl` is running.".format(self.config.interface)
+                )
             else:
-                raise RuntimeError('Interface {} does not have an IPv6 address'.format(self.config.interface))
+                raise RuntimeError(
+                    "Interface {} does not have an IPv6 address".format(
+                        self.config.interface
+                    )
+                )
 
         self.Handler = AirDropServerHandler
         self.Handler.config = self.config
 
-        self.zeroconf = Zeroconf(interfaces=[str(self.ip_addr)],
-                                 ip_version=IPVersion.V6Only,
-                                 apple_p2p=platform.system() == 'Darwin')
+        self.zeroconf = Zeroconf(
+            interfaces=[str(self.ip_addr)],
+            ip_version=IPVersion.V6Only,
+            apple_p2p=platform.system() == "Darwin",
+        )
 
         self.http_server = self._init_server()
         self.service_info = self._init_service()
 
     def _init_service(self):
         properties = self.get_properties()
-        server = self.config.host_name + '.local.'
-        service_name = self.config.service_id + '._airdrop._tcp.local.'
-        info = ServiceInfo('_airdrop._tcp.local.',
-                           service_name,
-                           port=self.config.port,
-                           properties=properties,
-                           server=server,
-                           addresses=[self.ip_addr.packed])
+        server = self.config.host_name + ".local."
+        service_name = self.config.service_id + "._airdrop._tcp.local."
+        info = ServiceInfo(
+            "_airdrop._tcp.local.",
+            service_name,
+            port=self.config.port,
+            properties=properties,
+            server=server,
+            addresses=[self.ip_addr.packed],
+        )
         return info
 
     def start_service(self):
-        logger.info('Announcing service: host {}, address {}, port {}'.format(self.config.host_name, self.ip_addr,
-                                                                              self.config.port))
+        logger.info(
+            "Announcing service: host {}, address {}, port {}".format(
+                self.config.host_name, self.ip_addr, self.config.port
+            )
+        )
         self.zeroconf.register_service(self.service_info)
 
     def _init_server(self):
@@ -92,15 +108,17 @@ class AirDropServer:
             httpd = self.ServerClass(self.serveraddress, self.Handler)
 
         # Adapt socket for awdl0
-        if self.config.interface == 'awdl0' and platform.system() == 'Darwin':
+        if self.config.interface == "awdl0" and platform.system() == "Darwin":
             httpd.socket.setsockopt(socket.SOL_SOCKET, 0x1104, 1)
 
-        httpd.socket = self.config.get_ssl_context().wrap_socket(sock=httpd.socket, server_side=True)
+        httpd.socket = self.config.get_ssl_context().wrap_socket(
+            sock=httpd.socket, server_side=True
+        )
 
         return httpd
 
     def start_server(self):
-        logger.info('Starting HTTPS server')
+        logger.info("Starting HTTPS server")
         self.http_server.serve_forever()
 
     def stop(self):
@@ -108,7 +126,7 @@ class AirDropServer:
         self.http_server.shutdown()
 
     def get_properties(self):
-        properties = {b'flags': str(self.config.flags).encode('utf-8')}
+        properties = {b"flags": str(self.config.flags).encode("utf-8")}
         return properties
 
 
@@ -120,7 +138,8 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
     """
     Server which responds to AirDrop HTTP POST requests
     """
-    protocol_version = 'HTTP/1.1'
+
+    protocol_version = "HTTP/1.1"
     config = None
 
     def _set_response(self, content_length):
@@ -128,7 +147,7 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         Setting the default values for a successful response
         """
         self.send_response(200)
-        self.send_header('Content-Length', content_length)
+        self.send_header("Content-Length", content_length)
         self.end_headers()
 
     def do_HEAD(self):
@@ -136,27 +155,29 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         Answer head requests
         """
         self.send_response(200)
-        self.send_header('Content-type', 'text/html')
+        self.send_header("Content-type", "text/html")
         self.end_headers()
 
     def do_GET(self):
         """
         Answer get requests
         """
-        logger.debug('GET request at {}'.format(self.path))
-        body = '\n'.encode('utf-8')
+        logger.debug("GET request at {}".format(self.path))
+        body = "\n".encode("utf-8")
         self._set_response(len(body))
         self.wfile.write(body)
 
     def handle_discover(self):
-        content_length = int(self.headers['Content-Length'])
+        content_length = int(self.headers["Content-Length"])
         post_data = self.rfile.read(content_length)
 
-        AirDropUtil.write_debug(self.config, post_data, 'receive_discover_request.plist')
+        AirDropUtil.write_debug(
+            self.config, post_data, "receive_discover_request.plist"
+        )
 
         # sample media capabilities as recorded from macOS 10.13.3
         media_capabilities = {
-            'Version': 1,
+            "Version": 1,
             # don't advertise any codec/container support so we receive legacy file formats (JPEG instead of HEIF, etc.)
             # 'Codecs': {
             #     'hvc1': {
@@ -184,59 +205,70 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
             # }
         }
         media_capabilities_json = json.JSONEncoder().encode(media_capabilities)
-        media_capabilities_binary = media_capabilities_json.encode('utf-8')
+        media_capabilities_binary = media_capabilities_json.encode("utf-8")
         discover_answer = {
-            'ReceiverMediaCapabilities': media_capabilities_binary,
-            'ReceiverComputerName': self.config.computer_name,
-            'ReceiverModelName': self.config.computer_model,
+            "ReceiverMediaCapabilities": media_capabilities_binary,
+            "ReceiverComputerName": self.config.computer_name,
+            "ReceiverModelName": self.config.computer_model,
         }
         if self.config.record_data:
-            discover_answer['ReceiverRecordData'] = self.config.record_data
+            discover_answer["ReceiverRecordData"] = self.config.record_data
 
-        discover_answer_binary = plistlib.dumps(discover_answer, fmt=plistlib.FMT_BINARY)
+        discover_answer_binary = plistlib.dumps(
+            discover_answer, fmt=plistlib.FMT_BINARY
+        )
 
-        AirDropUtil.write_debug(self.config, discover_answer_binary, 'receive_discover_response.plist')
+        AirDropUtil.write_debug(
+            self.config, discover_answer_binary, "receive_discover_response.plist"
+        )
 
         # Change to actual length
         self._set_response(len(discover_answer_binary))
         self.wfile.write(discover_answer_binary)
 
     def handle_ask(self):
-        content_length = int(self.headers['Content-Length'])
+        content_length = int(self.headers["Content-Length"])
         post_data = self.rfile.read(content_length)
 
-        AirDropUtil.write_debug(self.config, post_data, 'receive_ask_request.plist')
+        AirDropUtil.write_debug(self.config, post_data, "receive_ask_request.plist")
 
-        ask_response = {'ReceiverModelName': self.config.computer_model, 'ReceiverComputerName': self.config.computer_name}
+        ask_response = {
+            "ReceiverModelName": self.config.computer_model,
+            "ReceiverComputerName": self.config.computer_name,
+        }
         ask_resp_binary = plistlib.dumps(ask_response, fmt=plistlib.FMT_BINARY)
 
-        AirDropUtil.write_debug(self.config, ask_resp_binary, 'receive_ask_response.plist')
+        AirDropUtil.write_debug(
+            self.config, ask_resp_binary, "receive_ask_response.plist"
+        )
 
         self._set_response(len(ask_resp_binary))
         self.wfile.write(ask_resp_binary)
 
     def handle_upload(self):
-        if self.headers.get('content-type', '').lower() != 'application/x-cpio':
-            logger.warning('Unsupported content-type: {}'.format(self.headers.get('content-type')))
+        if self.headers.get("content-type", "").lower() != "application/x-cpio":
+            logger.warning(
+                "Unsupported content-type: {}".format(self.headers.get("content-type"))
+            )
             self.send_response(406)  # Unprocessable Entity
-            self.send_header('Content-Type', 'application/x-cpio')
-            self.send_header('Content-Length', 0)
-            self.send_header('Connection', 'close')
+            self.send_header("Content-Type", "application/x-cpio")
+            self.send_header("Content-Length", 0)
+            self.send_header("Connection", "close")
             self.end_headers()
             return
 
         # If pipelining is not support, 'Expect: 100-continue' is sent to which we need to respond
-        if self.headers.get('expect', '').lower() == '100-continue':
+        if self.headers.get("expect", "").lower() == "100-continue":
             self.send_response(100)
-            self.send_header('Content-Length', 0)
+            self.send_header("Content-Length", 0)
             self.end_headers()
 
-        if self.headers.get('transfer-encoding', '').lower() != 'chunked':
-            logger.warning('Expect chunked transfer encoding')
+        if self.headers.get("transfer-encoding", "").lower() != "chunked":
+            logger.warning("Expect chunked transfer encoding")
             self.send_response(400)  # Bad Request
-            self.send_header('Transfer-Encoding', 'Chunked')
-            self.send_header('Content-Length', 0)
-            self.send_header('Connection', 'close')
+            self.send_header("Transfer-Encoding", "Chunked")
+            self.send_header("Content-Length", 0)
+            self.send_header("Connection", "close")
             self.end_headers()
             return
 
@@ -269,18 +301,22 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
             with libarchive.read.stream_reader(stream) as archive:
                 libarchive.extract.extract_entries(archive, flags)
 
-        logger.info('Receiving file(s) ...')
+        logger.info("Receiving file(s) ...")
         start = time.time()
         reader = HTTPChunkedReader(self.rfile)
         extract_stream(reader)
 
         transferred = reader.total / 1024.0 / 1024.0
         speed = transferred / (time.time() - start)
-        logger.info('File(s) received (size {:.02f} MB, speed {:.02f} MB/s)'.format(transferred, speed))
+        logger.info(
+            "File(s) received (size {:.02f} MB, speed {:.02f} MB/s)".format(
+                transferred, speed
+            )
+        )
 
         self.send_response(200)
-        self.send_header('Content-Length', 0)
-        self.send_header('Connection', 'close')
+        self.send_header("Content-Length", 0)
+        self.send_header("Connection", "close")
         self.end_headers()
 
     def do_POST(self):
@@ -288,20 +324,24 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         Handle post requests
         """
 
-        logger.debug('POST request at {}'.format(self.path))
-        logger.debug('Headers\n{}'.format(self.headers))
+        logger.debug("POST request at {}".format(self.path))
+        logger.debug("Headers\n{}".format(self.headers))
 
-        if self.path == '/Discover':
+        if self.path == "/Discover":
             self.handle_discover()
-        elif self.path == '/Ask':
+        elif self.path == "/Ask":
             self.handle_ask()
-        elif self.path == '/Upload':
+        elif self.path == "/Upload":
             self.handle_upload()
         else:
-            logger.debug('POST request at {}'.format(self.path))
+            logger.debug("POST request at {}".format(self.path))
             self.send_response(400)
-            self.send_header('Content-Length', 0)
+            self.send_header("Content-Length", 0)
             self.end_headers()
 
     def log_message(self, format, *args):
-        logger.debug('{} - - [{}] {}'.format(self.client_address[0], self.log_date_time_string(), format % args))
+        logger.debug(
+            "{} - - [{}] {}".format(
+                self.client_address[0], self.log_date_time_string(), format % args
+            )
+        )
