@@ -135,7 +135,7 @@ class AirDropCli:
         try:
             address = info.parsed_addresses()[0]  # there should only be one address
         except IndexError:
-            logger.warn(f"Ignoring receiver with missing address {info}")
+            logger.warning(f"Ignoring receiver with missing address {info}")
             return
         id = info.name.split(".")[0]
         hostname = info.server
