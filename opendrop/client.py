@@ -138,7 +138,7 @@ class AirDropClient:
         discover_plist_binary = plistlib.dumps(
             discover_body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
         )
-        success, response_bytes = self.send_POST("/Discover", discover_plist_binary)
+        _, response_bytes = self.send_POST("/Discover", discover_plist_binary)
         response = plistlib.loads(response_bytes)
 
         # if name is returned, then receiver is discoverable
@@ -291,7 +291,7 @@ class HTTPSConnectionAWDL(HTTPSConnection):
         host, port = address
         err = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
-            af, socktype, proto, canonname, sa = res
+            af, socktype, proto, _, sa = res
             sock = None
             try:
                 sock = socket.socket(af, socktype, proto)
