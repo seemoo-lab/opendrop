@@ -35,7 +35,6 @@ setup(
     package_data={"opendrop": ["certs/*.pem"]},
     install_requires=[
         "Pillow",
-        "ctypescrypto",
         "fleep",
         "ifaddr",
         "libarchive-c",

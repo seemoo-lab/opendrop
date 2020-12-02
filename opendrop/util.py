@@ -27,7 +27,6 @@ import plistlib
 
 import ifaddr
 from PIL import Image, ExifTags
-from ctypescrypto import cms, x509, pkey, oid
 from libarchive import ffi
 from libarchive.entry import new_archive_entry, ArchiveEntry
 from libarchive.ffi import (
@@ -90,76 +89,6 @@ class AirDropUtil:
                 uti_type = "public.zip-archive"
 
         return uti_type
-
-    @staticmethod
-    def record_data(config, tls_cert, sign_cert, key):
-        """
-        This method generates the sender record data and will sign it using the CMS format.
-
-        This code serves documentation purposes only and is UNTESTED. To be accepted by Apple clients, we would need the
-        Apple-owned private key of the signing certificate.
-
-        :param tls_cert: path to certificate used for AirDrop TLS connections
-        :param sign_cert: path to signing certificate
-        :param key: path to private key to the signing certificate
-        """
-
-        valid_date = datetime.datetime.now() - datetime.timedelta(days=3)
-        valid_date_string = valid_date.strftime("%Y-%m-%dT%H:%M:%SZ")
-
-        emails_hashed = [
-            hashlib.sha256(email.encode("utf-8")).hexdigest() for email in config.email
-        ]
-        phone_numbers_hashed = [
-            hashlib.sha256(phone_number.encode("utf-8")).hexdigest()
-            for phone_number in config.phone
-        ]
-
-        # Get the common name of the TLS certificate
-        with open(tls_cert, "rb") as cert_file:
-            cert = x509.X509(cert_file.read())
-            cn = cert.subject[oid.Oid("2.5.4.3")]
-            encDsID = cn.replace("com.apple.idms.appleid.prd.", "")
-
-        # Construct record data
-        record_data = {
-            "Version": 2,
-            "encDsID": encDsID,  # Common name suffix of the certificate
-            "altDsID": encDsID,  # Same as encDsID
-            "SuggestValidDuration": 30 * 24 * 60 * 60,  # in seconds
-            "ValidAsOf": valid_date_string,  # 3 days before now
-            "ValidatedEmailHashes": emails_hashed,
-            "ValidatedPhoneHashes": phone_numbers_hashed,
-        }
-        record_data_plist = plistlib.dumps(record_data, fmt=plistlib.FMT_XML)
-
-        with open(sign_cert, "rb") as sign_cert_file:
-            with open(key, "rb") as key_file:
-                cert = x509.X509(sign_cert_file.read())
-                key = pkey.PKey(privkey=key_file.read())
-                # possibly need to add intermediate certs
-                cms_signed = cms.SignedData.create(
-                    record_data_plist,
-                    cert=cert,
-                    pkey=key,
-                    certs=None,
-                    flags=cms.Flags.PARTIAL,
-                )
-                signed_data = AirDropUtil.pem2der(cms_signed.pem())
-
-        return signed_data
-
-    @staticmethod
-    def pem2der(s):
-        """
-        Create DER Formatted bytes from a PEM Base64 String
-
-        :param s: PEM formatted string
-        """
-        start = s.find("-----\n")
-        finish = s.rfind("\n-----END")
-        data = s[start + 6 : finish]
-        return base64.b64decode(data)
 
     @staticmethod
     def generate_file_icon(file_path):

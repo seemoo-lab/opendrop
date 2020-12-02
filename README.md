@@ -23,12 +23,12 @@ In addition, it requires Python >=3.6 as well as several libraries.
 As AirDrop exclusively runs over Apple Wireless Direct Link (AWDL), OpenDrop is only supported on macOS or on Linux systems running an open re-implementation of AWDL such as [OWL](https://github.com/seemoo-lab/owl).
 
 **Libraries.**
-OpenDrop relies on current versions of [OpenSSL](https://www.openssl.org) and [libarchive](https://www.libarchive.org).
-macOS ships with rather old versions of the two, so you will need to install newer version, for example, via [Homebrew](https://brew.sh):
+OpenDrop relies on a current version of [libarchive](https://www.libarchive.org).
+macOS ships with a rather old version, so you will need to install a newer version, for example, via [Homebrew](https://brew.sh):
 ```bash
-brew install libarchive openssl
+brew install libarchive
 ```
-OpenDrop automatically sets `DYLD_LIBRARY_PATH` to look for the Homebrew versions. You may need to update the variable yourself if you install the libraries differently.
+OpenDrop automatically sets `DYLD_LIBRARY_PATH` to look for the Homebrew version. You may need to update the variable yourself if you install the libraries differently.
 
 Linux distributions should ship with more up-to-date versions, so this won't be necessary.
 
