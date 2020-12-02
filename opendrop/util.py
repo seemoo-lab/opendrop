@@ -22,9 +22,8 @@ import ipaddress
 import os
 
 import ifaddr
-from libarchive import ffi
 from libarchive.entry import ArchiveEntry, new_archive_entry
-from libarchive.ffi import (
+from libarchive.ffi import (  # pylint: disable=no-name-in-module
     ARCHIVE_EOF,
     entry_clear,
     entry_sourcepath,
@@ -32,6 +31,7 @@ from libarchive.ffi import (
     read_next_header2,
     write_data,
     write_finish_entry,
+    write_get_bytes_per_block,
     write_header,
 )
 from libarchive.write import ArchiveWrite, new_archive_read_disk
@@ -100,7 +100,7 @@ class AirDropUtil:
         try:
             exif = dict(
                 (ExifTags.TAGS[k], v)
-                for k, v in im._getexif().items()
+                for k, v in im._getexif().items()  # pylint: disable=protected-access
                 if k in ExifTags.TAGS
             )
             angles = {3: 180, 6: 270, 8: 90}
@@ -176,7 +176,7 @@ class AbsArchiveWrite(ArchiveWrite):
         """
         write_p = self._pointer
 
-        block_size = ffi.write_get_bytes_per_block(write_p)
+        block_size = write_get_bytes_per_block(write_p)
         if block_size <= 0:
             block_size = 10240  # pragma: no cover
 

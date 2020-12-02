@@ -138,7 +138,9 @@ class AirDropClient:
         if self.config.record_data:
             discover_body["SenderRecordData"] = self.config.record_data
 
-        discover_plist_binary = plistlib.dumps(discover_body, fmt=plistlib.FMT_BINARY)
+        discover_plist_binary = plistlib.dumps(
+            discover_body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+        )
         success, response_bytes = self.send_POST("/Discover", discover_plist_binary)
         response = plistlib.loads(response_bytes)
 
@@ -183,7 +185,9 @@ class AirDropClient:
         ask_body["Files"] = [e for e in file_entries(file_path)]
         ask_body["Items"] = []
 
-        ask_binary = plistlib.dumps(ask_body, fmt=plistlib.FMT_BINARY)
+        ask_binary = plistlib.dumps(
+            ask_body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+        )
         success, _ = self.send_POST("/Ask", ask_binary)
 
         return success
