@@ -215,7 +215,7 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
             discover_answer["ReceiverRecordData"] = self.config.record_data
 
         discover_answer_binary = plistlib.dumps(
-            discover_answer, fmt=plistlib.FMT_BINARY
+            discover_answer, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
         )
 
         AirDropUtil.write_debug(
@@ -236,7 +236,9 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
             "ReceiverModelName": self.config.computer_model,
             "ReceiverComputerName": self.config.computer_name,
         }
-        ask_resp_binary = plistlib.dumps(ask_response, fmt=plistlib.FMT_BINARY)
+        ask_resp_binary = plistlib.dumps(
+            ask_response, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+        )
 
         AirDropUtil.write_debug(
             self.config, ask_resp_binary, "receive_ask_response.plist"
