@@ -123,9 +123,7 @@ class AirDropCli:
             pass
         finally:
             self.browser.stop()
-            logger.debug(
-                "Save discovery results to {}".format(self.config.discovery_report)
-            )
+            logger.debug(f"Save discovery results to {self.config.discovery_report}")
             with open(self.config.discovery_report, "w") as f:
                 json.dump(self.discover, f)
 
@@ -137,16 +135,12 @@ class AirDropCli:
         try:
             address = info.parsed_addresses()[0]  # there should only be one address
         except IndexError:
-            logger.warn("Ignoring receiver with missing address {}".format(info))
+            logger.warn(f"Ignoring receiver with missing address {info}")
             return
         id = info.name.split(".")[0]
         hostname = info.server
         port = int(info.port)
-        logger.debug(
-            "AirDrop service found: {}, {}:{}, ID {}".format(
-                hostname, address, port, id
-            )
-        )
+        logger.debug(f"AirDrop service found: {hostname}, {address}:{port}, ID {id}")
         client = AirDropClient(self.config, (address, int(port)))
         try:
             flags = int(info.properties[b"flags"])
@@ -175,11 +169,9 @@ class AirDropCli:
         self.lock.acquire()
         self.discover.append(node_info)
         if discoverable:
-            logger.info(
-                "Found  index {}  ID {}  name {}".format(index, id, receiver_name)
-            )
+            logger.info(f"Found  index {index}  ID {id}  name {receiver_name}")
         else:
-            logger.debug("Receiver ID {} is not discoverable".format(id))
+            logger.debug(f"Receiver ID {id} is not discoverable")
         self.lock.release()
 
     def receive(self):
@@ -210,8 +202,7 @@ class AirDropCli:
         age = time.time() - os.path.getmtime(self.config.discovery_report)
         if age > 60:  # warn if report is older than a minute
             logger.warning(
-                "Old discovery report (%.1f seconds), consider running 'opendrop find' again",
-                age,
+                f"Old discovery report ({age:.1f} seconds), consider running 'opendrop find' again"
             )
         with open(self.config.discovery_report, "r") as f:
             infos = json.load(f)
