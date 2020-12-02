@@ -155,9 +155,10 @@ class AirDropConfig:
         )
 
     def get_ssl_context(self):
-        ctx = ssl.SSLContext(
+
+        ctx = ssl.SSLContext(  # lgtm[py/insecure-protocol], TODO see https://github.com/Semmle/ql/issues/2554
             ssl.PROTOCOL_TLS
-        )  # lgtm[py/insecure-protocol], TODO see https://github.com/Semmle/ql/issues/2554
+        )
         ctx.options |= ssl.OP_NO_TLSv1  # TLSv1.0 is insecure
         ctx.load_cert_chain(self.cert_file, keyfile=self.key_file)
         ctx.load_verify_locations(cafile=self.root_ca_file)
