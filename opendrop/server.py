@@ -335,6 +335,7 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def log_message(self, format, *args):
+        # pylint: disable=redefined-builtin
         logger.debug(
             f"{self.client_address[0]} - - [{self.log_date_time_string()}] {format % args}"
         )

@@ -73,14 +73,14 @@ class AirDropBrowser:
         self.browser = None
         self.zeroconf.close()
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
+    def add_service(self, zeroconf, service_type, name):
+        info = zeroconf.get_service_info(service_type, name)
         logger.debug(f"Add service {name}")
         if self.callback_add is not None:
             self.callback_add(info)
 
-    def remove_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
+    def remove_service(self, zeroconf, service_type, name):
+        info = zeroconf.get_service_info(service_type, name)
         logger.debug(f"Remove service {name}")
         if self.callback_remove is not None:
             self.callback_remove(info)
