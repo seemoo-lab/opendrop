@@ -112,15 +112,15 @@ class AirDropUtil:
 
         # Big image
         im.thumbnail((540, 540), Image.ANTIALIAS)
-        imgByteArr = io.BytesIO()
-        im.save(imgByteArr, format="JPEG2000")
-        file_icon = imgByteArr.getvalue()
+        img_bytes = io.BytesIO()
+        im.save(img_bytes, format="JPEG2000")
+        file_icon = img_bytes.getvalue()
 
         # Small image
         # im.thumbnail((64, 64), Image.ANTIALIAS)
-        # imgByteArr = io.BytesIO()
-        # im.save(imgByteArr, format='JPEG2000')
-        # small_file_icon = imgByteArr.getvalue()
+        # img_bytes = io.BytesIO()
+        # im.save(img_bytes, format='JPEG2000')
+        # small_file_icon = img_bytes.getvalue()
 
         return file_icon
 
