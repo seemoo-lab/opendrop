@@ -120,8 +120,14 @@ class AirDropConfig:
             logger.info("Key file or certificate does not exist")
             self.create_default_key()
 
-        # TODO extract record data from a sample exchange
+        self.record_file = os.path.join(self.key_dir, "validation_record.cms")
         self.record_data = None
+        if os.path.exists(self.record_file):
+            logger.debug("Using provided Apple ID Validation Record")
+            with open(self.record_file, "rb") as f:
+                self.record_data = f.read()
+        else:
+            logger.debug("No Apple ID Validation Record found")
 
     def create_default_key(self):
         logger.info("Create new self-signed certificate in {}".format(self.key_dir))

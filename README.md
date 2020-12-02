@@ -4,8 +4,8 @@
 [![Language grade](https://img.shields.io/lgtm/grade/python/github/seemoo-lab/opendrop?label=code%20quality)](https://lgtm.com/projects/g/seemoo-lab/opendrop/context:python)
 
 *OpenDrop* is a command-line tool that allows sharing files between devices directly over Wi-Fi. Its unique feature is that it is protocol-compatible with Apple AirDrop which allows to share files with Apple devices running iOS and macOS. 
-Currently (and probably also for the foreseeable future), OpenDrop only supports sending to Apple devices that are discoverable by *everybody* as the default *contacts only* mode requires [Apple-signed certificates](https://www.apple.com/certificateauthority/pdf/Apple_AAI_CPS_v6.1.pdf).
-
+~~Currently (and probably also for the foreseeable future), OpenDrop only supports sending to Apple devices that are discoverable by *everybody* as the default *contacts only* mode requires [Apple-signed certificates](https://www.apple.com/certificateauthority/pdf/Apple_AAI_CPS_v6.1.pdf).~~
+We support contacts-only devices by using extracted AirDrop credentials (keys and certificates) from macOS via our [keychain extractor](https://github.com/seemoo-lab/airdrop-keychain-extractor).
 
 ## Disclaimer
 
