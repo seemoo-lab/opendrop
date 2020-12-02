@@ -26,6 +26,6 @@ __version__ = "0.12.2"
 if platform.system() == "Darwin":
     dyld_path = os.environ.get("DYLD_LIBRARY_PATH", "")  # save old path
     archive_path = "/usr/local/opt/libarchive/lib"
-    os.environ["DYLD_LIBRARY_PATH"] = "{}:{}".format(dyld_path, archive_path)
+    os.environ["DYLD_LIBRARY_PATH"] = f"{dyld_path}:{archive_path}"
 
 logger = logging.getLogger(__name__)

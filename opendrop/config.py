@@ -81,9 +81,7 @@ class AirDropConfig:
         self.port = server_port
 
         if service_id is None:
-            service_id = "{0:0{1}x}".format(
-                random.randint(0, 0xFFFFFFFFFFFF), 12
-            )  # random 6-byte string in base16
+            service_id = f"{random.randint(0, 0xFFFFFFFFFFFF):012x}"  # random 6-byte string in base16
         self.service_id = service_id
 
         self.debug = debug
@@ -109,7 +107,7 @@ class AirDropConfig:
         self.root_ca_file = resource_filename("opendrop", "certs/apple_root_ca.pem")
         if not os.path.exists(self.root_ca_file):
             raise FileNotFoundError(
-                "Need Apple root CA certificate: {}".format(self.root_ca_file)
+                f"Need Apple root CA certificate: {self.root_ca_file}"
             )
 
         self.key_dir = os.path.join(self.airdrop_dir, "keys")
@@ -148,7 +146,7 @@ class AirDropConfig:
                 "-out",
                 "certificate.pem",
                 "-subj",
-                "/CN={}".format(self.computer_name),
+                f"/CN={self.computer_name}",
             ],
             cwd=self.key_dir,
             stdout=subprocess.PIPE,

@@ -97,7 +97,7 @@ class AirDropClient:
         logger.debug(f"Send {url} request")
 
         AirDropUtil.write_debug(
-            self.config, body, "send_{}_request.plist".format(url.lower().strip("/"))
+            self.config, body, f"send_{url.lower().strip('/')}_request.plist"
         )
 
         _headers = self._get_headers()
@@ -119,7 +119,7 @@ class AirDropClient:
         AirDropUtil.write_debug(
             self.config,
             response_bytes,
-            "send_{}_response.plist".format(url.lower().strip("/")),
+            f"send_{url.lower().strip('/')}_response.plist",
         )
 
         if http_resp.status != 200:

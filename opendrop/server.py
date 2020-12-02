@@ -54,14 +54,11 @@ class AirDropServer:
         if self.ip_addr is None:
             if self.config.interface == "awdl0":
                 raise RuntimeError(
-                    "Interface {} does not have an IPv6 address. "
-                    "Make sure that `owl` is running.".format(self.config.interface)
+                    f"Interface {self.config.interface} does not have an IPv6 address. Make sure that `owl` is running."
                 )
             else:
                 raise RuntimeError(
-                    "Interface {} does not have an IPv6 address".format(
-                        self.config.interface
-                    )
+                    f"Interface {self.config.interface} does not have an IPv6 address"
                 )
 
         self.Handler = AirDropServerHandler
