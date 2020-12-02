@@ -1,9 +1,9 @@
-.PHONY: ci checkformat lint test autoformat
+.PHONY: ci checkformat isort lint pylint test autoformat
 
 VENV=venv
 PYTHON=$(VENV)/bin/python3
 
-ci: isort checkformat lint test
+ci: isort checkformat lint pylint test
 
 $(VENV): $(VENV)/bin/activate
 
@@ -22,6 +22,9 @@ checkformat: $(VENV)
 
 lint: $(VENV)	
 	$(PYTHON) -m flake8 . --count --show-source --statistics --exclude $(VENV)
+
+pylint: $(VENV)
+	$(PYTHON) -m pylint --rcfile=setup.cfg opendrop
 
 isort: $(VENV)
 	$(PYTHON) -m isort -c opendrop/**.py
