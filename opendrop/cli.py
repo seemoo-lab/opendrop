@@ -117,8 +117,7 @@ class AirDropCli:
         self.browser = AirDropBrowser(self.config)
         self.browser.start(callback_add=self._found_receiver)
         try:
-            while True:
-                pass
+            threading.Event().wait()
         except KeyboardInterrupt:
             pass
         finally:
