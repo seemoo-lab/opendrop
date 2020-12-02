@@ -26,20 +26,20 @@ import os
 import plistlib
 
 import ifaddr
-from PIL import Image, ExifTags
 from libarchive import ffi
-from libarchive.entry import new_archive_entry, ArchiveEntry
+from libarchive.entry import ArchiveEntry, new_archive_entry
 from libarchive.ffi import (
     ARCHIVE_EOF,
-    entry_sourcepath,
     entry_clear,
-    read_next_header2,
+    entry_sourcepath,
     read_disk_descend,
-    write_header,
+    read_next_header2,
     write_data,
     write_finish_entry,
+    write_header,
 )
 from libarchive.write import ArchiveWrite, new_archive_read_disk
+from PIL import ExifTags, Image
 
 
 class AirDropUtil:

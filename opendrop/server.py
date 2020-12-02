@@ -23,14 +23,14 @@ import platform
 import plistlib
 import socket
 import time
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import libarchive
 import libarchive.extract
 import libarchive.read
+from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 from .util import AirDropUtil
-from zeroconf import Zeroconf, ServiceInfo, IPVersion
 
 logger = logging.getLogger(__name__)
 

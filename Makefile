@@ -3,7 +3,7 @@
 VENV=venv
 PYTHON=$(VENV)/bin/python3
 
-ci: checkformat lint test
+ci: isort checkformat lint test
 
 $(VENV): $(VENV)/bin/activate
 
@@ -23,8 +23,12 @@ checkformat: $(VENV)
 lint: $(VENV)	
 	$(PYTHON) -m flake8 . --count --show-source --statistics --exclude $(VENV)
 
+isort: $(VENV)
+	$(PYTHON) -m isort -c opendrop/**.py
+
 test: $(VENV)
 	$(PYTHON) -m pytest
 
 autoformat: $(VENV)
+	$(PYTHON) -m isort opendrop/**.py
 	$(PYTHON) -m black . --exclude $(VENV)

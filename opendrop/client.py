@@ -28,9 +28,9 @@ from http.client import HTTPSConnection
 
 import fleep
 import libarchive
+from zeroconf import IPVersion, ServiceBrowser, Zeroconf
 
-from .util import AirDropUtil, AbsArchiveWrite
-from zeroconf import ServiceBrowser, Zeroconf, IPVersion
+from .util import AbsArchiveWrite, AirDropUtil
 
 logger = logging.getLogger(__name__)
 

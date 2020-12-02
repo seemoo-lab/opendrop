@@ -22,6 +22,10 @@ jobs:
     - name: Install package
       run: |
         pip install -e .
+    - name: Check format with isort
+      run: |
+        pip install isort
+        isort -c opendrop/**.py
     - name: Check format with black
       run: |
         pip install black
