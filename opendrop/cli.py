@@ -137,7 +137,7 @@ class AirDropCli:
         except IndexError:
             logger.warning(f"Ignoring receiver with missing address {info}")
             return
-        id = info.name.split(".")[0]
+        identifier = info.name.split(".")[0]
         hostname = info.server
         port = int(info.port)
         logger.debug(f"AirDrop service found: {hostname}, {address}:{port}, ID {id}")
@@ -162,16 +162,16 @@ class AirDropCli:
             "name": receiver_name,
             "address": address,
             "port": port,
-            "id": id,
+            "id": identifier,
             "flags": flags,
             "discoverable": discoverable,
         }
         self.lock.acquire()
         self.discover.append(node_info)
         if discoverable:
-            logger.info(f"Found  index {index}  ID {id}  name {receiver_name}")
+            logger.info(f"Found  index {index}  ID {identifier}  name {receiver_name}")
         else:
-            logger.debug(f"Receiver ID {id} is not discoverable")
+            logger.debug(f"Receiver ID {identifier} is not discoverable")
         self.lock.release()
 
     def receive(self):
