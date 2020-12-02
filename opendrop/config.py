@@ -130,7 +130,7 @@ class AirDropConfig:
             logger.debug("No Apple ID Validation Record found")
 
     def create_default_key(self):
-        logger.info("Create new self-signed certificate in {}".format(self.key_dir))
+        logger.info(f"Create new self-signed certificate in {self.key_dir}")
         if not os.path.exists(self.key_dir):
             os.makedirs(self.key_dir)
         subprocess.run(

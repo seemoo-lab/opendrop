@@ -92,9 +92,7 @@ class AirDropServer:
 
     def start_service(self):
         logger.info(
-            "Announcing service: host {}, address {}, port {}".format(
-                self.config.host_name, self.ip_addr, self.config.port
-            )
+            f"Announcing service: host {self.config.host_name}, address {self.ip_addr}, port {self.config.port}"
         )
         self.zeroconf.register_service(self.service_info)
 
@@ -162,7 +160,7 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         """
         Answer get requests
         """
-        logger.debug("GET request at {}".format(self.path))
+        logger.debug(f"GET request at {self.path}")
         body = "\n".encode("utf-8")
         self._set_response(len(body))
         self.wfile.write(body)
@@ -250,7 +248,7 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
     def handle_upload(self):
         if self.headers.get("content-type", "").lower() != "application/x-cpio":
             logger.warning(
-                "Unsupported content-type: {}".format(self.headers.get("content-type"))
+                f"Unsupported content-type: {self.headers.get('content-type')}"
             )
             self.send_response(406)  # Unprocessable Entity
             self.send_header("Content-Type", "application/x-cpio")
@@ -311,9 +309,7 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         transferred = reader.total / 1024.0 / 1024.0
         speed = transferred / (time.time() - start)
         logger.info(
-            "File(s) received (size {:.02f} MB, speed {:.02f} MB/s)".format(
-                transferred, speed
-            )
+            f"File(s) received (size {transferred:.02f} MB, speed {speed:.02f} MB/s)"
         )
 
         self.send_response(200)
@@ -326,8 +322,8 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         Handle post requests
         """
 
-        logger.debug("POST request at {}".format(self.path))
-        logger.debug("Headers\n{}".format(self.headers))
+        logger.debug(f"POST request at {self.path}")
+        logger.debug(f"Headers\n{self.headers}")
 
         if self.path == "/Discover":
             self.handle_discover()
@@ -336,14 +332,12 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         elif self.path == "/Upload":
             self.handle_upload()
         else:
-            logger.debug("POST request at {}".format(self.path))
+            logger.debug(f"POST request at {self.path}")
             self.send_response(400)
             self.send_header("Content-Length", 0)
             self.end_headers()
 
     def log_message(self, format, *args):
         logger.debug(
-            "{} - - [{}] {}".format(
-                self.client_address[0], self.log_date_time_string(), format % args
-            )
+            f"{self.client_address[0]} - - [{self.log_date_time_string()}] {format % args}"
         )
