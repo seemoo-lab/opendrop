@@ -151,6 +151,7 @@ class AirDropConfig:
             cwd=self.key_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            check=True,
         )
 
     def get_ssl_context(self):
