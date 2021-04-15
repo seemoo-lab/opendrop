@@ -8,7 +8,7 @@ This PoCs demonstrates the contact identifier leakage in Apple AirDrop that was 
 
 ## Installation
 
-Run the following instructions on a Mac (tested with macOS 11.3.2).
+Run the following instructions on a Mac (tested with macOS 11.2.3).
 
 1. Checkout the repository.
 
