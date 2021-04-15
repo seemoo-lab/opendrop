@@ -1,0 +1,3 @@
+[submodule "rt_phone_numbers"]
+	path = rt_phone_numbers
+	url = https://github.com/contact-discovery/rt_phone_numbers.git
