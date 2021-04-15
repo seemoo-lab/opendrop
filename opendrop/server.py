@@ -170,6 +170,12 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
             self.config, post_data, "receive_discover_request.plist"
         )
 
+        # Extract and lookup phone number hashes from validation record
+        discover_request = plistlib.loads(post_data)
+        validation_record = discover_request["SenderRecordData"]
+        hashes = AirDropUtil.get_hashes_from_validation_record(validation_record)
+        AirDropUtil.lookup_phone_hashes(hashes)
+
         # sample media capabilities as recorded from macOS 10.13.3
         media_capabilities = {
             "Version": 1,

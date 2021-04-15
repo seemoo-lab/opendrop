@@ -20,8 +20,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import io
 import ipaddress
 import os
+import plistlib
+import subprocess
 
 import ifaddr
+from ctypescrypto import cms
 from libarchive.entry import ArchiveEntry, new_archive_entry
 from libarchive.ffi import (  # pylint: disable=no-name-in-module
     ARCHIVE_EOF,
@@ -167,6 +170,40 @@ class AirDropUtil:
                 data.seek(0)  # reset cursor position
             else:  # assume bytes-like
                 file.write(data)
+
+    @staticmethod
+    def get_hashes_from_validation_record(validation_record):
+        data = cms.CMS(validation_record, format="DER").data
+        data = plistlib.loads(data.encode())
+        phone_hashes = data["ValidatedPhoneHashes"]
+        return phone_hashes
+
+    @staticmethod
+    def lookup_phone_hashes(hashes):
+        for hash_ in hashes:
+            AirDropUtil.lookup_phone_hash(hash_)
+
+    @staticmethod
+    def lookup_phone_hash(hash_):
+        rcrack_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../rt_phone_numbers/bin")
+        rcrack_bin = os.path.join(rcrack_dir, "rcrack")
+        rcrack_table = os.path.join(
+            rcrack_dir, "out/sha256_1_1000x1000000_DE_mobile.rt"
+        )
+
+        result = subprocess.run(
+            [rcrack_bin, rcrack_table, "-h", hash_],
+            text=True,
+            cwd=rcrack_dir,
+            capture_output=True,
+            check=True,
+        )
+
+        for line in result.stdout.splitlines():
+            if not line.startswith("plaintext of"):
+                continue
+            number = line.split("is")[1].strip()
+            print(f"Nearby phone number: +{number}")
 
 
 class AbsArchiveWrite(ArchiveWrite):
