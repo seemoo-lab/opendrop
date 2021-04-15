@@ -185,7 +185,9 @@ class AirDropUtil:
 
     @staticmethod
     def lookup_phone_hash(hash_):
-        rcrack_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../rt_phone_numbers/bin")
+        rcrack_dir = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../rt_phone_numbers/bin"
+        )
         rcrack_bin = os.path.join(rcrack_dir, "rcrack")
         rcrack_table = os.path.join(
             rcrack_dir, "out/sha256_1_1000x1000000_DE_mobile.rt"
