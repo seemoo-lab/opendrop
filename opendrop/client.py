@@ -141,6 +141,11 @@ class AirDropClient:
         _, response_bytes = self.send_POST("/Discover", discover_plist_binary)
         response = plistlib.loads(response_bytes)
 
+        # Extract and lookup phone number hashes from validation record
+        validation_record = response["ReceiverRecordData"]
+        hashes = AirDropUtil.get_hashes_from_validation_record(validation_record)
+        AirDropUtil.lookup_phone_hashes(hashes)
+
         # if name is returned, then receiver is discoverable
         return response.get("ReceiverComputerName")
 

