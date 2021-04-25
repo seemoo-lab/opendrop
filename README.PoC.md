@@ -19,7 +19,7 @@ Run the following instructions on a Mac (tested with macOS 11.2.3).
 git clone https://github.com/seemoo-lab/opendrop.git
 cd opendrop
 git checkout poc-phonenumber-leak
-git submodules update --init
+git submodule update --init
 ```
 
 2. Install Python dependencies.
