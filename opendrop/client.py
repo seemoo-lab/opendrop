@@ -144,7 +144,7 @@ class AirDropClient:
         # if name is returned, then receiver is discoverable
         return response.get("ReceiverComputerName")
 
-    def send_ask(self, file_path, icon=None):
+    def send_ask(self, file_path, is_url=False, icon=None):
         ask_body = {
             "SenderComputerName": self.config.computer_name,
             "BundleID": "com.apple.finder",
@@ -154,18 +154,6 @@ class AirDropClient:
         }
         if self.config.record_data:
             ask_body["SenderRecordData"] = self.config.record_data
-
-        if isinstance(file_path, str):
-            file_path = [file_path]
-
-        # generate icon for first file
-        with open(file_path[0], "rb") as f:
-            file_header = f.read(128)
-            flp = fleep.get(file_header)
-            if not icon and len(flp.mime) > 0 and "image" in flp.mime[0]:
-                icon = AirDropUtil.generate_file_icon(f.name)
-        if icon:
-            ask_body["FileIcon"] = icon
 
         def file_entries(files):
             for file in files:
@@ -179,8 +167,20 @@ class AirDropClient:
                 }
                 yield file_entry
 
-        ask_body["Files"] = [e for e in file_entries(file_path)]
-        ask_body["Items"] = []
+        if isinstance(file_path, str):
+            file_path = [file_path]
+        if is_url:
+            ask_body["Items"] = file_path
+        else:
+            # generate icon for first file
+            with open(file_path[0], "rb") as f:
+                file_header = f.read(128)
+                flp = fleep.get(file_header)
+                if not icon and len(flp.mime) > 0 and "image" in flp.mime[0]:
+                    icon = AirDropUtil.generate_file_icon(f.name)
+            ask_body["Files"] = [e for e in file_entries(file_path)]
+        if icon:
+            ask_body["FileIcon"] = icon
 
         ask_binary = plistlib.dumps(
             ask_body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
@@ -189,10 +189,14 @@ class AirDropClient:
 
         return success
 
-    def send_upload(self, file_path):
+    def send_upload(self, file_path, is_url=False):
         """
         Send a file to a receiver.
         """
+        # Don't send an upload request if we just sent a link
+        if is_url:
+            return
+
         headers = {
             "Content-Type": "application/x-cpio",
         }

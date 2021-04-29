@@ -41,6 +41,7 @@ class AirDropCli:
         parser = argparse.ArgumentParser()
         parser.add_argument("action", choices=["receive", "find", "send"])
         parser.add_argument("-f", "--file", help="File to be sent")
+        parser.add_argument("-u", "--url", help="'-f,--file is a URL", action="store_true")
         parser.add_argument(
             "-r",
             "--receiver",
@@ -99,9 +100,10 @@ class AirDropCli:
             else:  # args.action == 'send'
                 if args.file is None:
                     parser.error("Need -f,--file when using send")
-                if not os.path.isfile(args.file):
+                if not os.path.isfile(args.file) and not args.url:
                     parser.error("File in -f,--file not found")
                 self.file = args.file
+                self.is_url = args.url
                 if args.receiver is None:
                     parser.error("Need -r,--receiver when using send")
                 self.receiver = args.receiver
@@ -184,12 +186,12 @@ class AirDropCli:
             return
         self.client = AirDropClient(self.config, (info["address"], info["port"]))
         logger.info("Asking receiver to accept ...")
-        if not self.client.send_ask(self.file):
+        if not self.client.send_ask(self.file, is_url=self.is_url):
             logger.warning("Receiver declined")
             return
         logger.info("Receiver accepted")
         logger.info("Uploading file ...")
-        if not self.client.send_upload(self.file):
+        if not self.client.send_upload(self.file, is_url=self.is_url):
             logger.warning("Uploading has failed")
             return
         logger.info("Uploading has been successful")

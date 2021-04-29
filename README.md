@@ -52,7 +52,7 @@ pip3 install ./opendrop
 We briefly explain how to send and receive files using `opendrop`.
 To see all command line options, run `opendrop -h`.
 
-### Sending a File
+### Sending a File or a Link
 
 Sending a file is typically a two-step procedure. You first discover devices in proximity using the `find` command.
 Stop the process once you have found the receiver.
@@ -62,7 +62,7 @@ Looking for receivers. Press Ctrl+C to stop ...
 Found  index 0  ID eccb2f2dcfe7  name John’s iPhone
 Found  index 1  ID e63138ac6ba8  name Jane’s MacBook Pro
 ```
-You can then `send` a file using 
+You can then `send` a file (or link, see below) using 
 ```
 $ opendrop send -r 0 -f /path/to/some/file
 Asking receiver to accept ...
@@ -72,6 +72,13 @@ Uploading has been successful
 ```
 Instead of the `index`, you can also use `ID` or `name`.
 OpenDrop will try to interpret the input in the order (1) `index`, (2) `ID`, and (3) `name` and fail if no match was found.
+
+**Sending a web link.** Since v0.13, OpenDrop supports sending web links, i.e., URLs, so that receiving Apple devices will immediately open their browser upon accepting. 
+(Note that OpenDrop _receivers_ still only support receiving regular files.)
+
+```
+$ opendrop send -r 0 -f https://owlink.org --url
+```
 
 ### Receiving Files
 
