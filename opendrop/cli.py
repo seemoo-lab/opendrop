@@ -41,7 +41,9 @@ class AirDropCli:
         parser = argparse.ArgumentParser()
         parser.add_argument("action", choices=["receive", "find", "send"])
         parser.add_argument("-f", "--file", help="File to be sent")
-        parser.add_argument("-u", "--url", help="'-f,--file is a URL", action="store_true")
+        parser.add_argument(
+            "-u", "--url", help="'-f,--file is a URL", action="store_true"
+        )
         parser.add_argument(
             "-r",
             "--receiver",
