@@ -94,7 +94,8 @@ OpenDrop is the result of a research project and, thus, has several limitations 
 
 ## Our Papers
 
-* Milan Stute, Sashank Narain, Alex Mariotto, Alexander Heinrich, David Kreitschmann, Guevara Noubir, and Matthias Hollick. **A Billion Open Interfaces for Eve and Mallory: MitM, DoS, and Tracking Attacks on iOS and macOS Through Apple Wireless Direct Link.** *28th USENIX Security Symposium (USENIX Security ’19)*, August 14–16, 2019, Santa Clara, CA, USA. [Link](https://www.usenix.org/conference/usenixsecurity19/presentation/stute)
+* Alexander Heinrich, Matthias Hollick, Thomas Schneider, Milan Stute, and Christian Weinert. **PrivateDrop: Practical Privacy-Preserving Authentication for Apple AirDrop.** *30th USENIX Security Symposium (USENIX Security ’21)*, August 14–16, 2019, virtual Event. [Paper](https://www.usenix.org/conference/usenixsecurity21/presentation/heinrich) [Website](https://privatedrop.github.io) [Code](https://github.com/seemoo-lab/privatedrop)
+* Milan Stute, Sashank Narain, Alex Mariotto, Alexander Heinrich, David Kreitschmann, Guevara Noubir, and Matthias Hollick. **A Billion Open Interfaces for Eve and Mallory: MitM, DoS, and Tracking Attacks on iOS and macOS Through Apple Wireless Direct Link.** *28th USENIX Security Symposium (USENIX Security ’19)*, August 14–16, 2019, Santa Clara, CA, USA. [Paper](https://www.usenix.org/conference/usenixsecurity19/presentation/stute)
 
 
 ## Authors
