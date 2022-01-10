@@ -39,7 +39,15 @@ Installation of the Python package [release](https://pypi.org/project/opendrop/)
 ```
 pip3 install opendrop
 ```
-
+Build `setup.py`:
+```
+cd opendrop
+python3 setup.py build
+```
+Install`setup.py`:
+```
+python3 setup.py install
+```
 You can also install the current development version by first cloning this repository, and then installing it via `pip3`:
 ```
 git clone https://github.com/seemoo-lab/opendrop.git
