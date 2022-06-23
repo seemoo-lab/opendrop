@@ -78,6 +78,10 @@ class AirDropBrowser:
         logger.debug(f"Add service {name}")
         if self.callback_add is not None:
             self.callback_add(info)
+    
+    def update_service(self, zeroconf, service_type, name):
+        """Callback when a service is updated."""
+        pass
 
     def remove_service(self, zeroconf, service_type, name):
         info = zeroconf.get_service_info(service_type, name)
