@@ -31,8 +31,10 @@ import libarchive.read
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 from .util import AirDropUtil
+from .logger import Logging
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+logger = Logging
 
 
 class AirDropServer:

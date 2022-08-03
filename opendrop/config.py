@@ -26,7 +26,10 @@ import subprocess
 
 from pkg_resources import resource_filename
 
-logger = logging.getLogger(__name__)
+from .logger import Logging
+
+# logger = logging.getLogger(__name__)
+logger = Logging
 
 
 class AirDropReceiverFlags:

@@ -31,8 +31,10 @@ import libarchive
 from zeroconf import IPVersion, ServiceBrowser, Zeroconf
 
 from .util import AbsArchiveWrite, AirDropUtil
+from .logger import Logging
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+logger = Logging
 
 
 class AirDropBrowser:

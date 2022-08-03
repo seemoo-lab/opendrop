@@ -19,17 +19,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
 import json
-import logging
 import os
 import sys
 import threading
 import time
+import logging
 
 from .client import AirDropBrowser, AirDropClient
 from .config import AirDropConfig, AirDropReceiverFlags
 from .server import AirDropServer
+from .logger import Logging
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+logger = Logging
 
 
 def main():
