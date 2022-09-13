@@ -219,7 +219,7 @@ class AirDropCli:
         except IndexError:
             pass
         # (2) try 'id'
-        if len(self.receiver) == 12:
+        if len(str(self.receiver)) == 12:
             for info in infos:
                 if info["id"] == self.receiver:
                     return info

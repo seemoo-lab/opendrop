@@ -181,7 +181,7 @@ class AbsArchiveWrite(ArchiveWrite):
             block_size = 10240  # pragma: no cover
 
         with new_archive_entry() as entry_p:
-            entry = ArchiveEntry(None, entry_p)
+            entry = ArchiveEntry(entry_p)
             with new_archive_read_disk(path) as read_p:
                 while True:
                     r = read_next_header2(read_p, entry_p)
