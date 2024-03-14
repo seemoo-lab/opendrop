@@ -163,8 +163,22 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def handle_discover(self):
-        content_length = int(self.headers["Content-Length"])
-        post_data = self.rfile.read(content_length)
+        if content_length := self.headers.get("Content-Length"):
+            post_data = self.rfile.read(int(content_length))
+        elif self.headers.get("Transfer-Encoding") == "chunked":
+            post_data = bytearray()
+            while True:
+                # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Transfer-Encoding#chunked_encoding
+                chunk_size = int(self.rfile.readline().rstrip(b"\r\n"),)
+                if chunk_size == 0: # end of chunks
+                    self.rfile.read() # consume rest of the input
+                    break
+                chunk_bytes = self.rfile.read(chunk_size)
+                post_data.extend(chunk_bytes)
+                assert self.rfile.read(2) == b"\r\n"
+        else:
+            raise Exception(f"Can't handle post body! Headers: {self.headers}")
+
 
         AirDropUtil.write_debug(
             self.config, post_data, "receive_discover_request.plist"
