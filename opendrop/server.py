@@ -176,6 +176,9 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
                 chunk_bytes = self.rfile.read(chunk_size)
                 post_data.extend(chunk_bytes)
                 assert self.rfile.read(2) == b"\r\n"
+        else:
+            raise Exception(f"Can't handle post body! Headers: {self.headers}")
+
 
         AirDropUtil.write_debug(
             self.config, post_data, "receive_discover_request.plist"
