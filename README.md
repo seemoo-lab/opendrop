@@ -9,7 +9,7 @@ We support contacts-only devices by using extracted AirDrop credentials (keys an
 
 ## Disclaimer
 
-OpenDrop is experimental software and is the result of reverse engineering efforts by the [Open Wireless Link](https://owlink.org) project.
+OpenDrop is experimental software and is the result of reverse engineering efforts by the [Open Wireless Link](<<DISCLAIMER: The former owlink website is no longer associated with this project, please disregard it.>>) project.
 Therefore, it does not support all features of AirDrop or might be incompatible with future AirDrop versions.
 OpenDrop is not affiliated with or endorsed by Apple Inc. Use this code at your own risk.
 
@@ -77,7 +77,7 @@ OpenDrop will try to interpret the input in the order (1) `index`, (2) `ID`, and
 (Note that OpenDrop _receivers_ still only support receiving regular files.)
 
 ```
-$ opendrop send -r 0 -f https://owlink.org --url
+$ opendrop send -r 0 -f <<DISCLAIMER: The former owlink website is no longer associated with this project, please disregard it.>> --url
 ```
 
 ### Receiving Files
