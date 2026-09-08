@@ -24,8 +24,6 @@ import socket
 import ssl
 import subprocess
 
-from pkg_resources import resource_filename
-
 logger = logging.getLogger(__name__)
 
 
@@ -104,7 +102,9 @@ class AirDropConfig:
             | AirDropReceiverFlags.SUPPORTS_DISCOVER_MAYBE
         )
 
-        self.root_ca_file = resource_filename("opendrop", "certs/apple_root_ca.pem")
+        self.root_ca_file = os.path.join(
+            os.path.dirname(__file__), "certs", "apple_root_ca.pem"
+        )
         if not os.path.exists(self.root_ca_file):
             raise FileNotFoundError(
                 f"Need Apple root CA certificate: {self.root_ca_file}"
