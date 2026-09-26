@@ -301,7 +301,22 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         logger.info("Receiving file(s) ...")
         start = time.time()
         reader = HTTPChunkedReader(self.rfile)
-        extract_stream(reader)
+        try:
+            # Senders are untrusted: refuse "../" and absolute paths and writes
+            # through symlinks, so nothing lands outside the current directory
+            extract_stream(
+                reader,
+                libarchive.extract.EXTRACT_SECURE_NODOTDOT
+                | libarchive.extract.EXTRACT_SECURE_NOABSOLUTEPATHS
+                | libarchive.extract.EXTRACT_SECURE_SYMLINKS,
+            )
+        except libarchive.ArchiveError as e:
+            logger.warning(f"Rejected unsafe or malformed archive: {e}")
+            self.send_response(400)  # Bad Request
+            self.send_header("Content-Length", 0)
+            self.send_header("Connection", "close")
+            self.end_headers()
+            return
 
         transferred = reader.total / 1024.0 / 1024.0
         speed = transferred / (time.time() - start)
