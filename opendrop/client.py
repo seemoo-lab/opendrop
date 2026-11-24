@@ -292,15 +292,20 @@ class HTTPSConnectionAWDL(HTTPSConnection):
         if timeout is None:
             timeout = socket.getdefaulttimeout()
 
+        # Python 3.12+ removed key_file/cert_file/check_hostname from
+        # HTTPSConnection.__init__ entirely (they were deprecated since 3.6).
+        # The cert/key are already loaded into the SSLContext via
+        # load_cert_chain(), so just set check_hostname on the context
+        # directly instead of passing it through to super().__init__().
+        if check_hostname is not None and context is not None:
+            context.check_hostname = check_hostname
+
         super(HTTPSConnectionAWDL, self).__init__(
             host=host,
             port=port,
-            key_file=key_file,
-            cert_file=cert_file,
             timeout=timeout,
             source_address=source_address,
             context=context,
-            check_hostname=check_hostname,
         )
 
         self.interface_name = interface_name
