@@ -98,6 +98,8 @@ OpenDrop is the result of a research project and, thus, has several limitations 
 
 * *Sending multiple files.* Apple AirDrop supports sending multiple files at once, OpenDrop does not (would require adding more files to the archive, modify HTTP /Ask request, etc.).
 
+* *Receiver compatibility for file uploads.* The `/Upload` wire format changed at some point after this project was originally written (plain gzip+CPIO was replaced with Apple's proprietary DVZip format as the default for receivers that advertise support for it). OpenDrop now detects this via the receiver's discovery flags and uses DVZip when supported, falling back to the original plain-gzip format otherwise. The DVZip path has been verified against current-generation iPadOS hardware (Contacts Only mode, November 2026); the gzip fallback for older receivers that don't advertise DVZip support has only been verified at the unit level, not against real pre-DVZip hardware.
+
 
 ## Our Papers
 

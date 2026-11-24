@@ -22,7 +22,9 @@ import logging
 import platform
 import plistlib
 import socket
+import struct
 import time
+import zlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import libarchive
@@ -33,6 +35,21 @@ from zeroconf import IPVersion, ServiceInfo, Zeroconf
 from .util import AirDropUtil
 
 logger = logging.getLogger(__name__)
+
+
+def _dvzip_decompress(data):
+    """
+    Inverse of the client's DVZip compressor: a sequence of
+    [4-byte big-endian compressed-length][zlib-compressed block] records.
+    """
+    out = io.BytesIO()
+    offset = 0
+    while offset < len(data):
+        length = struct.unpack(">I", data[offset : offset + 4])[0]
+        offset += 4
+        out.write(zlib.decompress(data[offset : offset + length]))
+        offset += length
+    return out.getvalue()
 
 
 class AirDropServer:
@@ -162,9 +179,22 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         self._set_response(len(body))
         self.wfile.write(body)
 
+    def _read_request_body(self):
+        if self.headers.get("transfer-encoding", "").lower() == "chunked":
+            body = b""
+            while True:
+                size = int(self.rfile.readline().rstrip(), 16)
+                if size == 0:
+                    self.rfile.readline()
+                    break
+                body += self.rfile.read(size)
+                self.rfile.readline()
+            return body
+        content_length = self.headers.get("Content-Length")
+        return self.rfile.read(int(content_length)) if content_length else b""
+
     def handle_discover(self):
-        content_length = int(self.headers["Content-Length"])
-        post_data = self.rfile.read(content_length)
+        post_data = self._read_request_body()
 
         AirDropUtil.write_debug(
             self.config, post_data, "receive_discover_request.plist"
@@ -222,8 +252,7 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         self.wfile.write(discover_answer_binary)
 
     def handle_ask(self):
-        content_length = int(self.headers["Content-Length"])
-        post_data = self.rfile.read(content_length)
+        post_data = self._read_request_body()
 
         AirDropUtil.write_debug(self.config, post_data, "receive_ask_request.plist")
 
@@ -243,68 +272,48 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         self.wfile.write(ask_resp_binary)
 
     def handle_upload(self):
-        if self.headers.get("content-type", "").lower() != "application/x-cpio":
-            logger.warning(
-                f"Unsupported content-type: {self.headers.get('content-type')}"
-            )
-            self.send_response(406)  # Unprocessable Entity
+        content_type = self.headers.get("content-type", "").lower()
+        if content_type not in ("application/x-dvzip", "application/x-cpio"):
+            logger.warning(f"Unsupported content-type: {self.headers.get('content-type')}")
+            self.send_response(406)  # Not Acceptable
             self.send_header("Content-Type", "application/x-cpio")
             self.send_header("Content-Length", 0)
             self.send_header("Connection", "close")
             self.end_headers()
             return
 
-        # If pipelining is not support, 'Expect: 100-continue' is sent to which we need to respond
+        # If pipelining is not supported, 'Expect: 100-continue' is sent to which we need to respond
         if self.headers.get("expect", "").lower() == "100-continue":
             self.send_response(100)
             self.send_header("Content-Length", 0)
             self.end_headers()
 
-        if self.headers.get("transfer-encoding", "").lower() != "chunked":
-            logger.warning("Expect chunked transfer encoding")
-            self.send_response(400)  # Bad Request
-            self.send_header("Transfer-Encoding", "Chunked")
+        logger.info("Receiving file(s) ...")
+        start = time.time()
+        raw_body = self._read_request_body()
+        AirDropUtil.write_debug(self.config, raw_body, "receive_upload_request.bin")
+
+        if content_type == "application/x-dvzip":
+            cpio_data = _dvzip_decompress(raw_body)
+        else:
+            # application/x-cpio: libarchive's stream_reader auto-detects
+            # gzip (or no compression at all) from the data itself, so no
+            # Content-Encoding header is needed -- real senders don't send one.
+            cpio_data = raw_body
+
+        try:
+            with libarchive.read.stream_reader(io.BytesIO(cpio_data)) as archive:
+                libarchive.extract.extract_entries(archive, 0)
+        except Exception as e:
+            logger.warning(f"Failed to extract archive: {e}")
+            self.send_response(500)
             self.send_header("Content-Length", 0)
             self.send_header("Connection", "close")
             self.end_headers()
             return
 
-        class HTTPChunkedReader(io.RawIOBase):
-            def __init__(self, rfile, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.rfile = rfile
-                self.chunk = None
-                self.total = 0
-
-            def _next_chunk(self):
-                if self.chunk is None or len(self.chunk) == 0:
-                    length = int(self.rfile.readline().rstrip(), 16)
-                    self.chunk = self.rfile.read(length)
-                    self.rfile.readline()  # strip trailing \n\r
-
-            def readinto(self, buf):
-                self._next_chunk()
-                length = min(len(self.chunk), len(buf))
-                buf[:length] = self.chunk[:length]
-                self.chunk = self.chunk[length:]
-                self.total += length
-                return length
-
-        def extract_stream(stream, flags=0):
-            """
-            Extracts an archive from memory into the current directory.
-            """
-
-            with libarchive.read.stream_reader(stream) as archive:
-                libarchive.extract.extract_entries(archive, flags)
-
-        logger.info("Receiving file(s) ...")
-        start = time.time()
-        reader = HTTPChunkedReader(self.rfile)
-        extract_stream(reader)
-
-        transferred = reader.total / 1024.0 / 1024.0
-        speed = transferred / (time.time() - start)
+        transferred = len(cpio_data) / 1024.0 / 1024.0
+        speed = transferred / max(time.time() - start, 1e-6)
         logger.info(
             f"File(s) received (size {transferred:.02f} MB, speed {speed:.02f} MB/s)"
         )
@@ -329,7 +338,6 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
         elif self.path == "/Upload":
             self.handle_upload()
         else:
-            logger.debug(f"POST request at {self.path}")
             self.send_response(400)
             self.send_header("Content-Length", 0)
             self.end_headers()
