@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import gzip
 import io
 import json
 import logging
@@ -296,9 +295,10 @@ class AirDropServerHandler(BaseHTTPRequestHandler):
 
         if content_type == "application/x-dvzip":
             cpio_data = _dvzip_decompress(raw_body)
-        elif self.headers.get("content-encoding", "").lower() == "gzip":
-            cpio_data = gzip.decompress(raw_body)
         else:
+            # application/x-cpio: libarchive's stream_reader auto-detects
+            # gzip (or no compression at all) from the data itself, so no
+            # Content-Encoding header is needed -- real senders don't send one.
             cpio_data = raw_body
 
         try:

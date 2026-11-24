@@ -186,7 +186,9 @@ class AirDropCli:
         info = self._get_receiver_info()
         if info is None:
             return
-        self.client = AirDropClient(self.config, (info["address"], info["port"]))
+        self.client = AirDropClient(
+            self.config, (info["address"], info["port"]), receiver_flags=info.get("flags")
+        )
         logger.info("Asking receiver to accept ...")
         if not self.client.send_ask(self.file, is_url=self.is_url):
             logger.warning("Receiver declined")

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import gzip
 import io
 import ipaddress
 import logging
@@ -33,6 +34,7 @@ import fleep
 import libarchive
 from zeroconf import IPVersion, ServiceBrowser, Zeroconf
 
+from .config import AirDropReceiverFlags
 from .util import AbsArchiveWrite, AirDropUtil
 
 logger = logging.getLogger(__name__)
@@ -109,10 +111,11 @@ class AirDropBrowser:
 
 
 class AirDropClient:
-    def __init__(self, config, receiver):
+    def __init__(self, config, receiver, receiver_flags=None):
         self.config = config
         self.receiver_host = receiver[0]
         self.receiver_port = receiver[1]
+        self.receiver_flags = receiver_flags
         self.http_conn = None
         self.transfer_id = None
 
@@ -238,9 +241,24 @@ class AirDropClient:
         stream.seek(0)
         cpio_data = stream.read()
 
-        data = _dvzip_compress(cpio_data)
+        # Receivers advertise DVZip support via a discovery flag bit; use
+        # it when we know the receiver supports it (flags unknown entirely
+        # is treated the same way, since every receiver we've verified this
+        # against advertises it). Otherwise fall back to the original plain
+        # gzip + Content-Length path, since we have no way to confirm a
+        # receiver that doesn't advertise SUPPORTS_DVZIP can parse it.
+        supports_dvzip = self.receiver_flags is None or bool(
+            self.receiver_flags & AirDropReceiverFlags.SUPPORTS_DVZIP
+        )
+        if supports_dvzip:
+            data = _dvzip_compress(cpio_data)
+            content_type = "application/x-dvzip"
+        else:
+            data = gzip.compress(cpio_data)
+            content_type = "application/x-cpio"
+
         headers = {
-            "Content-Type": "application/x-dvzip",
+            "Content-Type": content_type,
             "TotalBytes": str(os.path.getsize(file_path)),
             "TransferID": self.transfer_id,
         }
