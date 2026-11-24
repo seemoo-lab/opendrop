@@ -24,7 +24,9 @@ import socket
 import ssl
 import subprocess
 
-from pkg_resources import resource_filename
+from importlib.resources import files as _files
+def resource_filename(package, path):
+    return str(_files(package) / path)
 
 logger = logging.getLogger(__name__)
 
