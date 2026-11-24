@@ -24,6 +24,9 @@ import os
 import platform
 import plistlib
 import socket
+import struct
+import uuid
+import zlib
 from http.client import HTTPSConnection
 
 import fleep
@@ -33,6 +36,22 @@ from zeroconf import IPVersion, ServiceBrowser, Zeroconf
 from .util import AbsArchiveWrite, AirDropUtil
 
 logger = logging.getLogger(__name__)
+
+
+def _dvzip_compress(data, chunk_size=65536):
+    """
+    Apple's DVZip adaptive chunked compression format used for /Upload
+    bodies on receivers that advertise SUPPORTS_DVZIP: a sequence of
+    [4-byte big-endian compressed-length][zlib-compressed block] records,
+    one per input chunk.
+    """
+    out = io.BytesIO()
+    for offset in range(0, len(data), chunk_size):
+        block = data[offset : offset + chunk_size]
+        compressed = zlib.compress(block, 9)
+        out.write(struct.pack(">I", len(compressed)))
+        out.write(compressed)
+    return out.getvalue()
 
 
 class AirDropBrowser:
@@ -79,6 +98,9 @@ class AirDropBrowser:
         if self.callback_add is not None:
             self.callback_add(info)
 
+    def update_service(self, zeroconf, type_, name):
+        pass
+
     def remove_service(self, zeroconf, service_type, name):
         info = zeroconf.get_service_info(service_type, name)
         logger.debug(f"Remove service {name}")
@@ -92,6 +114,7 @@ class AirDropClient:
         self.receiver_host = receiver[0]
         self.receiver_port = receiver[1]
         self.http_conn = None
+        self.transfer_id = None
 
     def send_POST(self, url, body, headers=None):
         logger.debug(f"Send {url} request")
@@ -111,6 +134,7 @@ class AirDropClient:
                 self.receiver_port,
                 interface_name=self.config.interface,
                 context=self.config.get_ssl_context(),
+                timeout=30,
             )
         self.http_conn.request("POST", url, body=body, headers=_headers)
         http_resp = self.http_conn.getresponse()
@@ -145,12 +169,14 @@ class AirDropClient:
         return response.get("ReceiverComputerName")
 
     def send_ask(self, file_path, is_url=False, icon=None):
+        self.transfer_id = str(uuid.uuid4()).upper()
         ask_body = {
             "SenderComputerName": self.config.computer_name,
             "BundleID": "com.apple.finder",
             "SenderModelName": self.config.computer_model,
             "SenderID": self.config.service_id,
             "ConvertMediaFormats": False,
+            "TransferID": {"id": self.transfer_id},
         }
         if self.config.record_data:
             ask_body["SenderRecordData"] = self.config.record_data
@@ -160,10 +186,11 @@ class AirDropClient:
                 file_name = os.path.basename(file)
                 file_entry = {
                     "FileName": file_name,
-                    "FileType": AirDropUtil.get_uti_type(flp),
+                    "FileType": AirDropUtil.get_uti_type_for_file(file, flp),
                     "FileBomPath": os.path.join(".", file_name),
                     "FileIsDirectory": os.path.isdir(file_name),
-                    "ConvertMediaFormats": 0,
+                    "FileSize": os.path.getsize(file),
+                    "ShouldConvertMediaFormats": False,
                 }
                 yield file_entry
 
@@ -197,25 +224,27 @@ class AirDropClient:
         if is_url:
             return
 
-        headers = {
-            "Content-Type": "application/x-cpio",
-        }
-
-        # Create archive in memory ...
+        # Create archive in memory (raw cpio, no filter -- we DVZip-compress
+        # it ourselves below to match what current receivers expect).
         stream = io.BytesIO()
         with libarchive.custom_writer(
             stream.write,
             "cpio",
-            filter_name="gzip",
             archive_write_class=AbsArchiveWrite,
         ) as archive:
             for f in [file_path]:
                 ff = os.path.basename(f)
                 archive.add_abs_file(f, os.path.join(".", ff))
         stream.seek(0)
+        cpio_data = stream.read()
 
-        # ... then send in chunked mode
-        success, _ = self.send_POST("/Upload", stream, headers=headers)
+        data = _dvzip_compress(cpio_data)
+        headers = {
+            "Content-Type": "application/x-dvzip",
+            "TotalBytes": str(os.path.getsize(file_path)),
+            "TransferID": self.transfer_id,
+        }
+        success, _ = self.send_POST("/Upload", data, headers=headers)
 
         # TODO better: write archive chunk whenever send_POST does a read to avoid having the whole archive in memory
 

@@ -192,6 +192,16 @@ class AirDropCli:
             logger.warning("Receiver declined")
             return
         logger.info("Receiver accepted")
+        if self.is_url:
+            # For URL items the receiver already got everything it needs in
+            # the /Ask request body (the URL itself) and opens it directly;
+            # there is no file payload to upload, so send_upload() is a
+            # deliberate no-op (it returns None). Treat that as success
+            # instead of falling through to the "Uploading has failed"
+            # warning below, which was a false negative for URL sends.
+            self.client.send_upload(self.file, is_url=self.is_url)
+            logger.info("URL sent")
+            return
         logger.info("Uploading file ...")
         if not self.client.send_upload(self.file, is_url=self.is_url):
             logger.warning("Uploading has failed")

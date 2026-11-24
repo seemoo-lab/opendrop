@@ -22,11 +22,12 @@ import ipaddress
 import os
 
 import ifaddr
-from libarchive.entry import ArchiveEntry, new_archive_entry
+from libarchive.entry import new_archive_entry
 from libarchive.ffi import (  # pylint: disable=no-name-in-module
     ARCHIVE_EOF,
     entry_clear,
     entry_sourcepath,
+    entry_update_pathname_utf8,
     read_disk_descend,
     read_next_header2,
     write_data,
@@ -44,6 +45,48 @@ class AirDropUtil:
     They have been moved, because the opendrop files tend to get too long
     """
 
+    # Common file extensions mapped to their registered Apple UTI. Anything
+    # not listed here (or not detected below via magic bytes) falls back to
+    # "public.data" -- the generic "arbitrary binary data" UTI. Declaring an
+    # overly vague type like "public.content" makes the iOS receiver treat
+    # the incoming file as an unrecognized legacy format and wrap it in a
+    # MacBinary container instead of delivering it as the plain file.
+    EXTENSION_UTI_MAP = {
+        ".txt": "public.plain-text",
+        ".text": "public.plain-text",
+        ".rtf": "public.rtf",
+        ".pdf": "com.adobe.pdf",
+        ".json": "public.json",
+        ".xml": "public.xml",
+        ".html": "public.html",
+        ".htm": "public.html",
+        ".csv": "public.comma-separated-values-text",
+        ".zip": "public.zip-archive",
+        ".tar": "public.tar-archive",
+        ".gz": "org.gnu.gnu-zip-archive",
+        ".mp3": "public.mp3",
+        ".mp4": "public.mpeg-4",
+        ".mov": "com.apple.quicktime-movie",
+        ".doc": "com.microsoft.word.doc",
+        ".docx": "org.openxmlformats.wordprocessingml.document",
+        ".xls": "com.microsoft.excel.xls",
+        ".xlsx": "org.openxmlformats.spreadsheetml.sheet",
+        ".ppt": "com.microsoft.powerpoint.ppt",
+        ".pptx": "org.openxmlformats.presentationml.presentation",
+    }
+
+    @staticmethod
+    def get_uti_type_for_file(file_path, flp) -> str:
+        """
+        Combines extension-based lookup (reliable for text/document/archive
+        formats) with magic-byte sniffing (reliable for media formats fleep
+        recognizes), preferring the extension map when it has an entry.
+        """
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext in AirDropUtil.EXTENSION_UTI_MAP:
+            return AirDropUtil.EXTENSION_UTI_MAP[ext]
+        return AirDropUtil.get_uti_type(flp)
+
     @staticmethod
     def get_uti_type(flp) -> str:
         """
@@ -53,7 +96,7 @@ class AirDropUtil:
         """
 
         # Default UTI Type
-        uti_type = "public.content"
+        uti_type = "public.data"
         if len(flp.mime) == 0 or len(flp.type) == 0:
             return uti_type
 
@@ -111,16 +154,10 @@ class AirDropUtil:
             pass  # no EXIF data available
 
         # Big image
-        im.thumbnail((540, 540), Image.ANTIALIAS)
+        im.thumbnail((540, 540), Image.LANCZOS)
         img_bytes = io.BytesIO()
         im.save(img_bytes, format="JPEG2000")
         file_icon = img_bytes.getvalue()
-
-        # Small image
-        # im.thumbnail((64, 64), Image.ANTIALIAS)
-        # img_bytes = io.BytesIO()
-        # im.save(img_bytes, format='JPEG2000')
-        # small_file_icon = img_bytes.getvalue()
 
         return file_icon
 
@@ -181,13 +218,12 @@ class AbsArchiveWrite(ArchiveWrite):
             block_size = 10240  # pragma: no cover
 
         with new_archive_entry() as entry_p:
-            entry = ArchiveEntry(None, entry_p)
             with new_archive_read_disk(path) as read_p:
                 while True:
                     r = read_next_header2(read_p, entry_p)
                     if r == ARCHIVE_EOF:
                         break
-                    entry.pathname = store_path
+                    entry_update_pathname_utf8(entry_p, store_path.encode("utf-8"))
                     read_disk_descend(read_p)
                     write_header(write_p, entry_p)
                     try:
